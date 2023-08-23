@@ -84,6 +84,8 @@ exports.getPescoBill = async (req, res) => {
             due_date: dueDate,
         };
 
+        if (currentBill === '') res.status(404).send('Bill not found');
+
         if (res_query === 'bill') {
             res.status(200).send(updatedResponse);
         } else res.status(200).json(billDetails);
