@@ -63,6 +63,11 @@ exports.getSngplBill = async (req, res) => {
             due_date: dueDate,
         };
 
+        if (currentBill === '')
+            res.status(404).json({
+                message: 'Bill not found',
+            });
+
         if (res_query === 'bill') {
             res.status(200).send(billIframe(url));
         } else res.status(200).json(billDetails);
