@@ -21,11 +21,11 @@ app.get('/api/pesco/:ref', getPescoBill);
 app.get('/api/sngpl/:ref', getSngplBill);
 
 // Serve static files from the "build" directory
-app.use(express.static(path.join(__dirname, 'frontend')));
+app.use(express.static(path.join(__dirname, 'frontend/build')));
 
 // For any other route, send the index.html file
 app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'frontend', 'index.html'));
+    res.sendFile(path.join(__dirname, 'frontend/build', 'index.html'));
 });
 
 // start the server listening for requests
