@@ -1,12 +1,13 @@
 const axios = require('axios');
-const querystring = require('querystring');
 const cheerio = require('cheerio');
+const puppeteer = require('puppeteer');
 
 const homeurl = 'https://www.sngpl.com.pk';
 
 exports.getSngplBill = async (req, res) => {
     const refno = req.params.ref;
     const res_query = req.query.res;
+    const file_type = req.query.file;
 
     if (refno.length !== 11) return res.status(400).send('Ref no is not correct');
 
@@ -14,6 +15,11 @@ exports.getSngplBill = async (req, res) => {
 
     try {
         const response = await axios.get(url);
+
+        let updatedResponse = response.data;
+        updatedResponse = updatedResponse.replace(/href='print/g, `href='${homeurl}/print`);
+        updatedResponse = updatedResponse.replace(/src='..\//g, `src='${homeurl}/`);
+
         const $ = cheerio.load(response.data);
 
         const currentBill = $(
@@ -50,9 +56,40 @@ exports.getSngplBill = async (req, res) => {
         )
             .text()
             .trim();
-        // const currentBill = $().text().trim();
 
-        // const currentBill = $().text().trim();
+        if (res_query === 'download') {
+            const browser = await puppeteer.launch();
+            const page = await browser.newPage();
+            await page.setContent(updatedResponse);
+
+            if (file_type === 'pdf') {
+                // Set the HTML content to the updatedResponse
+                // Generate the PDF
+                const pdfBuffer = await page.pdf({ format: 'A4' });
+                // Close the browser
+                await browser.close();
+                // Send the PDF as a download attachment
+                res.setHeader('Content-Type', 'application/pdf');
+                res.setHeader('Content-Disposition', `attachment; filename=Bill_${billMonth}_${refno}.pdf`);
+                return res.send(pdfBuffer);
+            } else {
+                // Set the HTML content to the updatedResponse
+                // Adjust viewport size to capture full content
+                await page.setViewport({ width: 400, height: 600 }); // Adjust dimensions as needed
+
+                // Capture a screenshot of the full page
+                const screenshotBuffer = await page.screenshot({
+                    fullPage: true, // Capture the entire page, including scrolling
+                });
+                // Close the browser
+                await browser.close();
+
+                // Send the image as a download attachment
+                res.setHeader('Content-Type', 'image/png');
+                res.setHeader('Content-Disposition', `attachment; filename=Bill_${billMonth}_${refno}.png`);
+                res.send(screenshotBuffer);
+            }
+        }
 
         const billDetails = {
             bill_name: billName,
@@ -82,7 +119,6 @@ const billIframe = (url) => {
     <html>
         <head>
             <title>SNGPL BILL</title>
-            <meta name="viewport" content="width=device-width, initial-scale=1">
             <style>
                 body {
                     margin: 0px;

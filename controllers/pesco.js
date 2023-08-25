@@ -1,12 +1,14 @@
 const axios = require('axios');
 const querystring = require('querystring');
 const cheerio = require('cheerio');
+const puppeteer = require('puppeteer');
 
 const homeurl = 'https://bill.pitc.com.pk';
 
 exports.getPescoBill = async (req, res) => {
     const refno = req.params.ref;
     const res_query = req.query.res;
+    const file_type = req.query.file;
 
     if (refno.length !== 14) return res.status(400).send('Ref no is not correct');
 
@@ -33,8 +35,48 @@ exports.getPescoBill = async (req, res) => {
         updatedResponse = updatedResponse.replace(/src="\//g, `src="${homeurl}/`);
         updatedResponse = updatedResponse.replace(/href="\//g, `href="${homeurl}/`);
         updatedResponse = updatedResponse.replace(/action="\.\//g, `action="${homeurl}/pescobill/`);
-
         const $ = cheerio.load(updatedResponse);
+
+        const billMonth = $(
+            'body > div > div.headertable.fontsize > div:nth-child(4) > table > tbody > tr:nth-child(2) > td:nth-child(1)'
+        )
+            .text()
+            .trim();
+
+        if (res_query === 'download') {
+            const browser = await puppeteer.launch();
+            const page = await browser.newPage();
+
+            if (file_type === 'pdf') {
+                // Set the HTML content to the updatedResponse
+                await page.setContent(updatedResponse);
+                // Generate the PDF
+                const pdfBuffer = await page.pdf({ format: 'A3' });
+                // Close the browser
+                await browser.close();
+                // Send the PDF as a download attachment
+                res.setHeader('Content-Type', 'application/pdf');
+                res.setHeader('Content-Disposition', `attachment; filename=Bill_${billMonth}_${refno}.pdf`);
+                return res.send(pdfBuffer);
+            } else {
+                // Set the HTML content to the updatedResponse
+                await page.setContent(updatedResponse);
+                // Adjust viewport size to capture full content
+                await page.setViewport({ width: 1200, height: 800 }); // Adjust dimensions as needed
+
+                // Capture a screenshot of the full page
+                const screenshotBuffer = await page.screenshot({
+                    fullPage: true, // Capture the entire page, including scrolling
+                });
+                // Close the browser
+                await browser.close();
+
+                // Send the image as a download attachment
+                res.setHeader('Content-Type', 'image/png');
+                res.setHeader('Content-Disposition', `attachment; filename=Bill_${billMonth}_${refno}.png`);
+                return res.send(screenshotBuffer);
+            }
+        }
 
         const currentBill = $(
             'body > div > div.headertable.fontsize > div:nth-child(4) > table > tbody > tr:nth-child(1) > td.border-b.border-t.border-r.content'
@@ -62,12 +104,6 @@ exports.getPescoBill = async (req, res) => {
 
         const units = $(
             'body > div > table:nth-child(5) > tbody > tr > td.border-r > table > tbody > tr.content > td:nth-child(5)'
-        )
-            .text()
-            .trim();
-
-        const billMonth = $(
-            'body > div > div.headertable.fontsize > div:nth-child(4) > table > tbody > tr:nth-child(2) > td:nth-child(1)'
         )
             .text()
             .trim();

@@ -6,6 +6,7 @@ import './index.css';
 import Error from './Error';
 import MainScreen from './Components/MainScreen';
 import BillInfo from './Components/BillInfo';
+import ViewFullBill from './Components/ViewFullBill';
 
 const router = createBrowserRouter([
     {
@@ -20,6 +21,10 @@ const router = createBrowserRouter([
             {
                 path: 'search/:refNo',
                 element: <BillInfo />,
+            },
+            {
+                path: 'bill/:refNo',
+                element: <ViewFullBill />,
             },
         ],
     },

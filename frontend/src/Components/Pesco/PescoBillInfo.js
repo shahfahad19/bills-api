@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Wrapper from '../Utils/Wrapper';
 import { SpinnerWithText } from '../Utils/Spinner';
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { AlertModal } from '../Utils/Modal';
 
@@ -127,9 +127,9 @@ const PescoBillInfo = () => {
                                     )}
                                 </td>
                                 <td>
-                                    <a href={`/api/pesco/${refNo}?res=bill`} className='btn btn-block btn-secondary'>
+                                    <Link to={`/bill/${refNo}`} className='btn btn-block btn-secondary'>
                                         View Full Bill
-                                    </a>
+                                    </Link>
                                 </td>
                             </tr>
                         </tbody>
