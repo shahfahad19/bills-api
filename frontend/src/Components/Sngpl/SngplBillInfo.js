@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
 import Wrapper from '../Utils/Wrapper';
 import { SpinnerWithText } from '../Utils/Spinner';
-import { Link, useLocation, useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { AlertModal } from '../Utils/Modal';
 
 const SngplBillInfo = () => {
-    const location = useLocation(); // Get location object using useLocation hook
     const params = useParams();
     const refNo = params.refNo;
     const [billData, setBillData] = useState();
@@ -25,7 +24,7 @@ const SngplBillInfo = () => {
             console.log(err);
         }
         axios
-            .get('/api/sngpl/' + refNo)
+            .get('https://billsapp.vercel.app/api/sngpl/' + refNo)
             .then((response) => {
                 setBillData(response.data);
             })

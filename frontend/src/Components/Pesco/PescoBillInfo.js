@@ -24,7 +24,7 @@ const PescoBillInfo = () => {
             console.log(err);
         }
         axios
-            .get('/api/pesco/' + refNo)
+            .get('https://billsapp.vercel.app/api/pesco/' + refNo)
             .then((response) => {
                 setBillData(response.data);
             })

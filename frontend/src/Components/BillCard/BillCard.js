@@ -9,7 +9,7 @@ const BillCard = ({ refNo }) => {
 
     useState(() => {
         axios
-            .get(`/api/${billType}/${refNo}`)
+            .get(`https://billsapp.vercel.app/api/${billType}/${refNo}`)
             .then((response) => {
                 setBill(response.data);
             })
