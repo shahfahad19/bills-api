@@ -3,6 +3,7 @@ const express = require('express');
 const dotenv = require('dotenv');
 const app = express();
 const cors = require('cors');
+const path = require('path');
 
 dotenv.config({ path: './config.env' });
 app.use(cors({ origin: '*' }));
@@ -12,14 +13,20 @@ const PORT = process.env.PORT || 6000;
 const { getPescoBill } = require('./controllers/pesco');
 const { getSngplBill } = require('./controllers/sngpl');
 
-app.get('/', (req, res) => {
+app.get('/api', (req, res) => {
     res.send('Api Running');
 });
 
-app.get('/pesco/:ref', getPescoBill);
-app.get('/sngpl/:ref', getSngplBill);
+app.get('/api/pesco/:ref', getPescoBill);
+app.get('/api/sngpl/:ref', getSngplBill);
 
-// define the first route
+// Serve static files from the "build" directory
+app.use(express.static(path.join(__dirname, 'frontend')));
+
+// For any other route, send the index.html file
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'frontend', 'index.html'));
+});
 
 // start the server listening for requests
 app.listen(PORT, () => {
