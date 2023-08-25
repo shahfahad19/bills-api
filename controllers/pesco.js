@@ -64,7 +64,7 @@ exports.getPescoBill = async (req, res) => {
                 // Set the HTML content to the updatedResponse
                 await page.setContent(updatedResponse);
                 // Adjust viewport size to capture full content
-                await page.setViewport({ width: 1200, height: 800 }); // Adjust dimensions as needed
+                await page.setViewport({ width: 600, height: 1200 }); // Adjust dimensions as needed
 
                 // Capture a screenshot of the full page
                 const screenshotBuffer = await page.screenshot({
