@@ -44,7 +44,9 @@ exports.getPescoBill = async (req, res) => {
             .trim();
 
         if (res_query === 'download') {
-            const browser = await puppeteer.launch();
+            const browser = await puppeteer.connect({
+                browserWSEndpoint: `wss://chrome.browserless.io?token=e39874c2-d422-4520-a91a-12d596b382e3`,
+            });
             const page = await browser.newPage();
 
             if (file_type === 'pdf') {
