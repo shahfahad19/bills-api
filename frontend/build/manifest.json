@@ -1,6 +1,6 @@
 {
-  "short_name": "My Bills",
-  "name": "My Bills",
+  "short_name": "Rewatch",
+  "name": "Rewatch App",
   "icons": [
     {
       "src": "favicon.ico",
@@ -20,6 +20,6 @@
   ],
   "start_url": ".",
   "display": "standalone",
-  "theme_color": "#0fa9dd",
+  "theme_color": "#000000",
   "background_color": "#ffffff"
 }
