@@ -1,6 +1,6 @@
 import axios from 'axios';
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const BillCard = ({ refNo }) => {
     const navigate = useNavigate();
@@ -48,9 +48,9 @@ const BillCard = ({ refNo }) => {
                                         {bill.units} Units
                                     </p>
                                 )}
-                                <Link to={`/api/${billType}/${refNo}?res=bill`} className='btn btn-xs btn-primary'>
+                                <a href={`/api/${billType}/${refNo}?res=bill`} className='btn btn-xs btn-primary'>
                                     View Bill
-                                </Link>
+                                </a>
                             </div>
                         </div>
 

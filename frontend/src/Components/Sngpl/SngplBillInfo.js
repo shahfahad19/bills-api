@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Wrapper from '../Utils/Wrapper';
 import { SpinnerWithText } from '../Utils/Spinner';
-import { Link, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { AlertModal } from '../Utils/Modal';
 
@@ -41,7 +41,7 @@ const SngplBillInfo = () => {
             setBillAdded(true);
             setAlert({
                 show: true,
-                text: 'Bill added!',
+                text: 'Bill added successfully!',
             });
         } catch (err) {
             console.log('err', err);
@@ -61,7 +61,7 @@ const SngplBillInfo = () => {
             setBillAdded(false);
             setAlert({
                 show: true,
-                text: 'Bill deleted!',
+                text: 'Bill deleted successfully!',
             });
         } catch (err) {
             console.log('err', err);
@@ -123,9 +123,9 @@ const SngplBillInfo = () => {
                                     )}
                                 </td>
                                 <td>
-                                    <Link to={`/api/sngpl/${refNo}?res=bill`} className='btn btn-block btn-secondary'>
+                                    <a href={`/api/sngpl/${refNo}?res=bill`} className='btn btn-block btn-secondary'>
                                         View Full Bill
-                                    </Link>
+                                    </a>
                                 </td>
                             </tr>
                         </tbody>
