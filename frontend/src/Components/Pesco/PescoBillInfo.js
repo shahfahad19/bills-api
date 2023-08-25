@@ -138,13 +138,15 @@ const PescoBillInfo = () => {
                 {error && <div className='flex justify-center items-center h-52'>{error}</div>}
             </Wrapper>
 
-            <AlertModal
-                type='success'
-                text={alert.text}
-                handler={() => {
-                    setAlert({ show: false });
-                }}
-            />
+            {alert.show && (
+                <AlertModal
+                    type='success'
+                    text={alert.text}
+                    handler={() => {
+                        setAlert({ show: false });
+                    }}
+                />
+            )}
             <div className='h-14'></div>
         </>
     );
