@@ -1,7 +1,16 @@
 const axios = require('axios');
 const querystring = require('querystring');
 const cheerio = require('cheerio');
-const puppeteer = require('puppeteer');
+
+let puppeteer;
+let chrome = {};
+
+if (process.env.AWS_LAMBDA_FUNCTION_VERSION) {
+    chrome = require('chrome-aws-lambda');
+    puppeteer = require('puppeteer-core');
+} else {
+    puppeteer = require('puppeteer');
+}
 
 const homeurl = 'https://bill.pitc.com.pk';
 
@@ -44,9 +53,17 @@ exports.getPescoBill = async (req, res) => {
             .trim();
 
         if (res_query === 'download') {
-            const browser = await puppeteer.connect({
-                browserWSEndpoint: `wss://chrome.browserless.io?token=e39874c2-d422-4520-a91a-12d596b382e3`,
-            });
+            let options = {};
+            if (process.env.AWS_LAMBDA_FUNCTION_VERSION) {
+                options = {
+                    args: [...chrome.args, '--hide-scrollbars', '--disable-web-security'],
+                    defaultViewport: chrome.defaultViewport,
+                    executablePath: await chrome.executablePath,
+                    headless: true,
+                    ignoreHTTPSErrors: true,
+                };
+            }
+            const browser = await puppeteer.connect(options);
             const page = await browser.newPage();
 
             if (file_type === 'pdf') {
