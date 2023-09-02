@@ -2,16 +2,6 @@ const axios = require('axios');
 const querystring = require('querystring');
 const cheerio = require('cheerio');
 
-let puppeteer;
-let chrome = {};
-
-if (process.env.AWS_LAMBDA_FUNCTION_VERSION) {
-    chrome = require('chrome-aws-lambda');
-    puppeteer = require('puppeteer-core');
-} else {
-    puppeteer = require('puppeteer');
-}
-
 const homeurl = 'https://bill.pitc.com.pk';
 
 exports.getPescoBill = async (req, res) => {
@@ -53,22 +43,28 @@ exports.getPescoBill = async (req, res) => {
             .trim();
 
         if (res_query === 'download') {
-            let options = {};
+            let puppeteer;
+            let browser;
             if (process.env.AWS_LAMBDA_FUNCTION_VERSION) {
-                console.log('Lmabdaaaa');
-            } else {
-                console.log('Nope');
-            }
-            if (process.env.AWS_LAMBDA_FUNCTION_VERSION) {
-                options = {
-                    args: [...chrome.args, '--hide-scrollbars', '--disable-web-security'],
-                    defaultViewport: chrome.defaultViewport,
-                    executablePath: await chrome.executablePath,
+                const chromium = require('chrome-aws-lambda');
+                puppeteer = require('puppeteer-core');
+
+                const options = {
+                    args: [...chromium.args, '--hide-scrollbars', '--disable-web-security'],
+                    defaultViewport: chromium.defaultViewport,
+                    executablePath: await chromium.executablePath,
                     headless: true,
                     ignoreHTTPSErrors: true,
                 };
+
+                browser = await puppeteer.connect(options);
+            } else {
+                puppeteer = require('puppeteer');
+
+                // Create a browser instance for non-Lambda environments
+                browser = await puppeteer.launch();
             }
-            const browser = await puppeteer.connect(options);
+
             const page = await browser.newPage();
 
             if (file_type === 'pdf') {
