@@ -55,6 +55,11 @@ exports.getPescoBill = async (req, res) => {
         if (res_query === 'download') {
             let options = {};
             if (process.env.AWS_LAMBDA_FUNCTION_VERSION) {
+                console.log('Lmabdaaaa');
+            } else {
+                console.log('Nope');
+            }
+            if (process.env.AWS_LAMBDA_FUNCTION_VERSION) {
                 options = {
                     args: [...chrome.args, '--hide-scrollbars', '--disable-web-security'],
                     defaultViewport: chrome.defaultViewport,
