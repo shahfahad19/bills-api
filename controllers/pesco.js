@@ -53,47 +53,51 @@ exports.getPescoBill = async (req, res) => {
             .trim();
 
         if (res_query === 'download') {
-            let options = {};
-            if (process.env.AWS_LAMBDA_FUNCTION_VERSION) {
-                options = {
-                    args: [...chrome.args, '--hide-scrollbars', '--disable-web-security'],
-                    defaultViewport: chrome.defaultViewport,
-                    executablePath: await chrome.executablePath,
-                    headless: true,
-                    ignoreHTTPSErrors: true,
-                };
-            }
-            const browser = await puppeteer.connect(options);
-            const page = await browser.newPage();
+            try {
+                let options = {};
+                if (process.env.AWS_LAMBDA_FUNCTION_VERSION) {
+                    options = {
+                        args: [...chrome.args, '--hide-scrollbars', '--disable-web-security'],
+                        defaultViewport: chrome.defaultViewport,
+                        executablePath: await chrome.executablePath,
+                        headless: true,
+                        ignoreHTTPSErrors: true,
+                    };
+                }
+                const browser = await puppeteer.connect(options);
+                const page = await browser.newPage();
 
-            if (file_type === 'pdf') {
-                // Set the HTML content to the updatedResponse
-                await page.setContent(updatedResponse);
-                // Generate the PDF
-                const pdfBuffer = await page.pdf({ format: 'A3' });
-                // Close the browser
-                await browser.close();
-                // Send the PDF as a download attachment
-                res.setHeader('Content-Type', 'application/pdf');
-                res.setHeader('Content-Disposition', `attachment; filename=Bill_${billMonth}_${refno}.pdf`);
-                return res.send(pdfBuffer);
-            } else {
-                // Set the HTML content to the updatedResponse
-                await page.setContent(updatedResponse);
-                // Adjust viewport size to capture full content
-                await page.setViewport({ width: 600, height: 1200 }); // Adjust dimensions as needed
+                if (file_type === 'pdf') {
+                    // Set the HTML content to the updatedResponse
+                    await page.setContent(updatedResponse);
+                    // Generate the PDF
+                    const pdfBuffer = await page.pdf({ format: 'A3' });
+                    // Close the browser
+                    await browser.close();
+                    // Send the PDF as a download attachment
+                    res.setHeader('Content-Type', 'application/pdf');
+                    res.setHeader('Content-Disposition', `attachment; filename=Bill_${billMonth}_${refno}.pdf`);
+                    return res.send(pdfBuffer);
+                } else {
+                    // Set the HTML content to the updatedResponse
+                    await page.setContent(updatedResponse);
+                    // Adjust viewport size to capture full content
+                    await page.setViewport({ width: 600, height: 1200 }); // Adjust dimensions as needed
 
-                // Capture a screenshot of the full page
-                const screenshotBuffer = await page.screenshot({
-                    fullPage: true, // Capture the entire page, including scrolling
-                });
-                // Close the browser
-                await browser.close();
+                    // Capture a screenshot of the full page
+                    const screenshotBuffer = await page.screenshot({
+                        fullPage: true, // Capture the entire page, including scrolling
+                    });
+                    // Close the browser
+                    await browser.close();
 
-                // Send the image as a download attachment
-                res.setHeader('Content-Type', 'image/png');
-                res.setHeader('Content-Disposition', `attachment; filename=Bill_${billMonth}_${refno}.png`);
-                return res.send(screenshotBuffer);
+                    // Send the image as a download attachment
+                    res.setHeader('Content-Type', 'image/png');
+                    res.setHeader('Content-Disposition', `attachment; filename=Bill_${billMonth}_${refno}.png`);
+                    return res.send(screenshotBuffer);
+                }
+            } catch (err) {
+                res.status(500).send({ err });
             }
         }
 
