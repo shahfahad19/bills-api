@@ -183,6 +183,10 @@ exports.getPescoBill = async (req, res) => {
         } else res.status(200).json(billDetails);
     } catch (error) {
         console.error('Axios Error:', error.message);
-        res.status(500).send(error);
+        res.status(500).send({
+            error: 'Error occured',
+            message: error.message,
+            err: error,
+        });
     }
 };
