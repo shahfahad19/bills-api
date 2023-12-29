@@ -39,11 +39,25 @@ exports.getSngplBill = async (req, res) => {
         )
             .text()
             .trim();
-        const billMonth = $(
+        let billMonth = $(
             'body > div > div > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td:nth-child(2) > table > tbody > tr:nth-child(2) > td.txt-ct'
         )
             .text()
             .trim();
+
+        const [monthAbbreviation, year] = billMonth.split(' ');
+
+        // Convert the month abbreviation to the full month name
+        const monthFullName = new Date(`${monthAbbreviation} 1, ${year}`).toLocaleString('en-US', { month: 'long' });
+
+        const months = [
+            'January', 'February', 'March', 'April',
+            'May', 'June', 'July', 'August',
+            'September', 'October', 'November', 'December'
+        ];
+
+        const index = months.indexOf(monthFullName);
+        billMonth = months[(index + 1) % 12];
 
         const dueDate = $(
             'body > div > div > table > tbody > tr:nth-child(8) > td > table > tbody > tr > td:nth-child(2) > table > tbody > tr.txt-bld > td:nth-child(3)'
@@ -93,13 +107,28 @@ exports.getSngplBill = async (req, res) => {
             }
         }
 
+
+        const givenDateParts = dueDate.split('-');
+        const givenDate = new Date(`${givenDateParts[2]}-${givenDateParts[1]}-${givenDateParts[0]} UTC`);
+
+        // Get the current date
+        const currentDate = new Date();
+
+        // Calculate the difference in milliseconds
+        const timeDifference = givenDate.getTime() - currentDate.getTime();
+
+        // Convert the difference to days
+        const daysDifference = Math.ceil(timeDifference / (1000 * 3600 * 24));
+
+
         const billDetails = {
             bill_name: billName,
             bill_month: billMonth,
-            reading_date: readingDate,
+            reading_date: convertDate(readingDate),
             current_bill: currentBill,
             after_due_bill: afterDueDateBill,
-            due_date: dueDate,
+            due_date: convertDate(dueDate),
+            remaining_days: daysDifference
         };
 
         if (currentBill === '')
@@ -156,3 +185,16 @@ const billIframe = (url) => {
     </html>
     `;
 };
+
+
+const convertDate = date => {
+    const dateParts = date.split('-');
+    const convertedDate = new Date(`${dateParts[2]}-${dateParts[1]}-${dateParts[0]} UTC`);
+
+    // Format the due_date to "dd month, yyyy"
+    return convertedDate.toLocaleDateString('en-PK', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+    });
+}

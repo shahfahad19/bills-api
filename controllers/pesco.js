@@ -36,11 +36,20 @@ exports.getPescoBill = async (req, res) => {
         updatedResponse = updatedResponse.replace(/action="\.\//g, `action="${homeurl}/pescobill/`);
         const $ = cheerio.load(updatedResponse);
 
-        const billMonth = $(
+
+        let billMonth = $(
             'body > div > div.headertable.fontsize > div:nth-child(4) > table > tbody > tr:nth-child(2) > td:nth-child(1)'
         )
             .text()
             .trim();
+
+        const [monthAbbreviation, year] = billMonth.split(' ');
+
+        // Convert the month abbreviation to the full month name
+        const monthFullName = new Date(`${monthAbbreviation} 1, ${year}`).toLocaleString('en-US', { month: 'long' });
+
+        billMonth = monthFullName;
+
 
         if (res_query === 'download') {
             if (process.env.AWS_LAMBDA_FUNCTION_VERSION) {
@@ -163,14 +172,19 @@ exports.getPescoBill = async (req, res) => {
 
         const readingDate = $('body > div > table:nth-child(2) > tbody > tr.content > td:nth-child(5)').text().trim();
 
+
+        // Convert the difference to days
+        const daysRemaining = Math.ceil((new Date(dueDate + " UTC").getTime() - new Date().getTime()) / (1000 * 3600 * 24));
+
         const billDetails = {
             bill_name: billName,
             units: units,
             bill_month: billMonth,
-            reading_date: readingDate,
+            reading_date: convertDate(readingDate),
             current_bill: currentBill,
             after_due_bill: afterDueDateBill,
-            due_date: dueDate,
+            due_date: convertDate(dueDate),
+            remaining_days: daysRemaining
         };
 
         if (currentBill === '')
@@ -190,3 +204,12 @@ exports.getPescoBill = async (req, res) => {
         });
     }
 };
+
+
+const convertDate = date => {
+    return new Date(date + " UTC").toLocaleDateString('en-PK', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+    });
+}
