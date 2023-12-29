@@ -99,6 +99,25 @@ const SngplBillInfo = () => {
                                 <td>{billData.due_date}</td>
                             </tr>
                             <tr>
+                                <th>Days Remaining:</th>
+                                <td> {billData.remaining_days < 0 && <p className='text-error text-sm'>Date exceeded</p>}
+                                    {billData.remaining_days >= 0 && <>
+                                        {billData.remaining_days === 0 && <p className='text-error text-sm'>Last day of payment</p>
+                                        }
+
+                                        {billData.remaining_days === 1 && <p className='text-warning text-sm'>1 day left to pay</p>
+                                        }
+
+                                        {billData.remaining_days > 1 && billData.remaining_days <= 3 && <p className='text-warning text-sm'>{billData.remaining_days} days left to pay</p>
+                                        }
+
+                                        {billData.remaining_days > 3 && <p className='text-success text-sm'>{billData.remaining_days} days left to pay</p>
+                                        }
+
+                                    </>}
+                                </td>
+                            </tr>
+                            <tr>
                                 <th>Bill Amount: </th>
                                 <td>
                                     <span className='text-primary font-semibold'>Rs. {billData.current_bill}</span>

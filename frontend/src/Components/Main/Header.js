@@ -9,7 +9,11 @@ const Header = () => {
                 <div className='navbar-start'>
                     <div className='navbar-item'>
                         <Link to='/' className='font-medium'>
-                            <img src='./../../192.png' className='object-cover w-10' alt='' />
+                            <div className='flex items-center'>
+                                <img src='./../../192.png' className='object-cover w-10' alt='' />
+                                <span className='text-primary ps-3'>MyBills</span>
+                            </div>
+
                         </Link>
                     </div>
 
