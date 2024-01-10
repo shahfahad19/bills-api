@@ -123,7 +123,7 @@ exports.getSngplBill = async (req, res) => {
 
         const billDetails = {
             bill_name: billName,
-			units: 0,
+			units: "0",
             bill_month: billMonth,
             reading_date: convertDate(readingDate),
             current_bill: currentBill,
