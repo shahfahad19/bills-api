@@ -9,7 +9,7 @@ exports.getSngplBill = async (req, res) => {
     const res_query = req.query.res;
     const file_type = req.query.file;
 
-    if (refno.length !== 14) return res.status(400).json({
+    if (refno.length !== 11) return res.status(400).json({
         message: 'Ref no is not correct'
     });
 
