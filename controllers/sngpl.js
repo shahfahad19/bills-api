@@ -124,8 +124,9 @@ exports.getSngplBill = async (req, res) => {
 
 
         const billDetails = {
+            ref: refno,
             bill_name: billName,
-            units: "0",
+            units: "N/A",
             bill_month: billMonth,
             reading_date: convertDate(readingDate),
             current_bill: currentBill,

@@ -179,6 +179,7 @@ exports.getPescoBill = async (req, res) => {
         const daysRemaining = Math.ceil((new Date(dueDate + " UTC").getTime() - new Date().getTime()) / (1000 * 3600 * 24));
 
         const billDetails = {
+            ref: refno,
             bill_name: billName,
             units: units,
             bill_month: billMonth,
