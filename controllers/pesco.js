@@ -9,7 +9,9 @@ exports.getPescoBill = async (req, res) => {
     const res_query = req.query.res;
     const file_type = req.query.file;
 
-    if (refno.length !== 14) return res.status(400).send('Ref no is not correct');
+    if (refno.length !== 14) return res.status(400).json({
+        message: 'Ref no is not correct'
+    });
 
     const url = `https://bill.pitc.com.pk/pescobill/general?refno=${refno}`;
 
@@ -196,7 +198,6 @@ exports.getPescoBill = async (req, res) => {
             res.status(200).send(updatedResponse);
         } else res.status(200).json(billDetails);
     } catch (error) {
-        console.error('Axios Error:', error.message);
         res.status(500).send({
             error: 'Error occured',
             message: error.message,
@@ -204,7 +205,6 @@ exports.getPescoBill = async (req, res) => {
         });
     }
 };
-
 
 const convertDate = date => {
     return new Date(date + " UTC").toLocaleDateString('en-PK', {

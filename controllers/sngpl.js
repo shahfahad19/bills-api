@@ -9,7 +9,9 @@ exports.getSngplBill = async (req, res) => {
     const res_query = req.query.res;
     const file_type = req.query.file;
 
-    if (refno.length !== 11) return res.status(400).send('Ref no is not correct');
+    if (refno.length !== 14) return res.status(400).json({
+        message: 'Ref no is not correct'
+    });
 
     const url = `${homeurl}/viewbill?proc=viewbill&client=ANDROID&contype=NewCon&consumer=${refno}`;
 
@@ -123,7 +125,7 @@ exports.getSngplBill = async (req, res) => {
 
         const billDetails = {
             bill_name: billName,
-			units: "0",
+            units: "0",
             bill_month: billMonth,
             reading_date: convertDate(readingDate),
             current_bill: currentBill,
@@ -141,8 +143,11 @@ exports.getSngplBill = async (req, res) => {
             res.status(200).send(billIframe(url));
         } else res.status(200).json(billDetails);
     } catch (error) {
-        console.error('Axios Error:', error.message);
-        res.status(500).send('An error occurred.');
+        res.status(500).send({
+            error: 'Error occured',
+            message: error.message,
+            err: error,
+        });
     }
 };
 
