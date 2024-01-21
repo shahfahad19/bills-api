@@ -36,6 +36,7 @@ exports.getPescoBill = async (req, res) => {
         updatedResponse = updatedResponse.replace(/src="\//g, `src="${homeurl}/`);
         updatedResponse = updatedResponse.replace(/href="\//g, `href="${homeurl}/`);
         updatedResponse = updatedResponse.replace(/action="\.\//g, `action="${homeurl}/pescobill/`);
+		updatedResponse = updatedResponse.replace('http://snap','https://snap');
         const $ = cheerio.load(updatedResponse);
 
 
