@@ -145,7 +145,7 @@ exports.getSngplBill = async (req, res) => {
             company: 'SNGPL',
             ref: refno,
             bill_name: billName,
-            units,
+            units: units + ' HM3',
             bill_month: billMonth,
             reading_date: convertDate(readingDate),
             current_bill: currentBill.replaceAll(',', ''),
