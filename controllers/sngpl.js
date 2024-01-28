@@ -23,6 +23,7 @@ exports.getSngplBill = async (req, res) => {
         let updatedResponse = response.data;
         updatedResponse = updatedResponse.replace(/href='print/g, `href='${homeurl}/print`);
         updatedResponse = updatedResponse.replace(/src='..\//g, `src='${homeurl}/`);
+		updatedResponse = updatedResponse.replace('"sheet" style="', '"sheet" style="margin: 0; ');
 
         const $ = cheerio.load(response.data);
 
@@ -135,6 +136,8 @@ exports.getSngplBill = async (req, res) => {
 
         // Convert the difference to days
         const daysDifference = Math.ceil(timeDifference / (1000 * 3600 * 24));
+		
+		
 
 
         const billDetails = {
