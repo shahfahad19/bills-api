@@ -23,7 +23,7 @@ exports.getSngplBill = async (req, res) => {
         let updatedResponse = response.data;
         updatedResponse = updatedResponse.replace(/href='print/g, `href='${homeurl}/print`);
         updatedResponse = updatedResponse.replace(/src='..\//g, `src='${homeurl}/`);
-		updatedResponse = updatedResponse.replace('"sheet" style="', '"sheet" style="margin: 0; ');
+		updatedResponse = updatedResponse.replace(`style='pos`, `style='margin:0; p'`);
 
         const $ = cheerio.load(response.data);
 
