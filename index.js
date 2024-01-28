@@ -10,6 +10,7 @@ app.use(cors({ origin: '*' }));
 
 const PORT = process.env.PORT || 6000;
 
+const { getElectricityBill } = require('./controllers/electricity');
 const { getPescoBill } = require('./controllers/pesco');
 const { getSngplBill } = require('./controllers/sngpl');
 
@@ -17,6 +18,7 @@ app.get('/api', (req, res) => {
     res.send('Api Running');
 });
 
+app.get('/api/bill/:ref', getElectricityBill, getSngplBill);
 app.get('/api/pesco/:ref', getPescoBill);
 app.get('/api/sngpl/:ref', getSngplBill);
 

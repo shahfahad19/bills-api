@@ -1,6 +1,8 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
 const puppeteer = require('puppeteer-core');
+const zlib = require('zlib');
+
 
 const homeurl = 'https://www.sngpl.com.pk';
 
@@ -23,6 +25,24 @@ exports.getSngplBill = async (req, res) => {
         updatedResponse = updatedResponse.replace(/src='..\//g, `src='${homeurl}/`);
 
         const $ = cheerio.load(response.data);
+
+
+
+        const rows = $('.sheet > div:nth-child(2) > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(4) > td:nth-child(2) > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(3) > td:nth-child(1) > table:nth-child(1) > tbody:nth-child(1)').find('tr');
+
+        const pastData = [];
+
+        rows.each(function () {
+            const month = $(this).find('td:first-child').text().trim();
+            const unit = $(this).find('td:nth-child(2)').text().trim();
+            if (month !== '') {
+                pastData.push({
+                    month,
+                    units: unit
+                })
+            }
+
+        });
 
         const currentBill = $(
             'body > div > div > table > tbody > tr:nth-child(8) > td > table > tbody > tr > td:nth-child(2) > table > tbody > tr.txt-bld > td:nth-child(1)'
@@ -73,6 +93,13 @@ exports.getSngplBill = async (req, res) => {
             .text()
             .trim();
 
+
+        const units = $(
+            '.sheet > div:nth-child(2) > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(3) > td:nth-child(1) > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(1) > table:nth-child(2) > tbody:nth-child(1) > tr:nth-child(4) > td:nth-child(5)'
+        )
+            .text()
+            .trim();
+
         if (res_query === 'download') {
             const browser = await puppeteer.connect({
                 browserWSEndpoint: `wss://chrome.browserless.io?token=e39874c2-d422-4520-a91a-12d596b382e3`,
@@ -81,28 +108,17 @@ exports.getSngplBill = async (req, res) => {
             await page.setContent(updatedResponse);
 
             if (file_type === 'pdf') {
-                // Set the HTML content to the updatedResponse
-                // Generate the PDF
                 const pdfBuffer = await page.pdf({ format: 'A4' });
-                // Close the browser
                 await browser.close();
-                // Send the PDF as a download attachment
                 res.setHeader('Content-Type', 'application/pdf');
                 res.setHeader('Content-Disposition', `attachment; filename=Bill_${billMonth}_${refno}.pdf`);
                 return res.send(pdfBuffer);
             } else {
-                // Set the HTML content to the updatedResponse
-                // Adjust viewport size to capture full content
-                await page.setViewport({ width: 400, height: 600 }); // Adjust dimensions as needed
-
-                // Capture a screenshot of the full page
+                await page.setViewport({ width: 400, height: 600 });
                 const screenshotBuffer = await page.screenshot({
-                    fullPage: true, // Capture the entire page, including scrolling
+                    fullPage: true,
                 });
-                // Close the browser
                 await browser.close();
-
-                // Send the image as a download attachment
                 res.setHeader('Content-Type', 'image/png');
                 res.setHeader('Content-Disposition', `attachment; filename=Bill_${billMonth}_${refno}.png`);
                 res.send(screenshotBuffer);
@@ -113,10 +129,8 @@ exports.getSngplBill = async (req, res) => {
         const givenDateParts = dueDate.split('-');
         const givenDate = new Date(`${givenDateParts[2]}-${givenDateParts[1]}-${givenDateParts[0]} UTC`);
 
-        // Get the current date
         const currentDate = new Date();
 
-        // Calculate the difference in milliseconds
         const timeDifference = givenDate.getTime() - currentDate.getTime();
 
         // Convert the difference to days
@@ -124,15 +138,19 @@ exports.getSngplBill = async (req, res) => {
 
 
         const billDetails = {
+            type: 'gas',
+            company: 'SNGPL',
             ref: refno,
             bill_name: billName,
-            units: "N/A",
+            units,
             bill_month: billMonth,
             reading_date: convertDate(readingDate),
-            current_bill: currentBill,
-            after_due_bill: afterDueDateBill,
+            current_bill: currentBill.replaceAll(',', ''),
+            after_due_bill: afterDueDateBill.replaceAll(',', ''),
             due_date: convertDate(dueDate),
-            remaining_days: daysDifference
+            remaining_days: daysDifference,
+            past_data: pastData,
+            bill_data: compressText(updatedResponse.replace(/\s+/g, ' '))
         };
 
         if (currentBill === '')
@@ -141,7 +159,7 @@ exports.getSngplBill = async (req, res) => {
             });
 
         if (res_query === 'bill') {
-            res.status(200).send(billIframe(url));
+            res.status(200).send(updatedResponse);
         } else res.status(200).json(billDetails);
     } catch (error) {
         res.status(500).send({
@@ -204,4 +222,10 @@ const convertDate = date => {
         month: 'long',
         year: 'numeric',
     });
+}
+
+
+const compressText = (text) => {
+    const compressedData = zlib.deflateSync(Buffer.from(text, 'utf8'));
+    return compressedData.toString('base64');
 }
