@@ -22,15 +22,22 @@ app.get('/api/bill/:ref', getElectricityBill, getSngplBill);
 app.get('/api/pesco/:ref', getPescoBill);
 app.get('/api/sngpl/:ref', getSngplBill);
 
-// Serve static files from the "build" directory
+app.get('/api/version', (req, res) => {
+    res.json({
+        versionCode: 3,
+        versionName: '1.1',
+        message: 'A new update is available',
+        appLink: 'https://google.com',
+        skipable: true
+    })
+});
+
 app.use(express.static(path.join(__dirname, 'frontend/build')));
 
-// For any other route, send the index.html file
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'frontend/build', 'index.html'));
 });
 
-// start the server listening for requests
 app.listen(PORT, () => {
     console.clear();
     console.log(`Api running on http://localhost:${PORT}`);
