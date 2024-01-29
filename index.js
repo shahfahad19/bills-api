@@ -19,8 +19,34 @@ app.get('/api', (req, res) => {
 });
 
 app.get('/api/bill/:ref', getElectricityBill, getSngplBill);
-app.get('/api/pesco/:ref', getPescoBill);
-app.get('/api/sngpl/:ref', getSngplBill);
+
+app.get('/api/pesco/:ref', (req, res) => {
+    res.json({
+        ref: '',
+        bill_name: 'Update Required',
+        units: '',
+        bill_month: '',
+        reading_date: '',
+        current_bill: '',
+        after_due_bill: '',
+        due_date: '',
+        remaining_days: 0
+    });
+});
+
+app.get('/api/sngpl/:ref', (req, res) => {
+    res.json({
+        ref: '',
+        bill_name: 'Update Required',
+        units: '',
+        bill_month: '',
+        reading_date: '',
+        current_bill: '',
+        after_due_bill: '',
+        due_date: '',
+        remaining_days: 0
+    });
+});
 
 app.get('/api/version', (req, res) => {
     res.json({
