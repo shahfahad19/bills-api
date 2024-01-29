@@ -23,9 +23,9 @@ exports.getSngplBill = async (req, res) => {
         let updatedResponse = response.data;
         updatedResponse = updatedResponse.replace(/href='print/g, `href='${homeurl}/print`);
         updatedResponse = updatedResponse.replace(/src='..\//g, `src='${homeurl}/`);
-		updatedResponse = updatedResponse.replace(`style='pos`, `style='margin:0; position: relative; width: 210mm; height: 296mm  p'`);
-		updatedResponse = updatedResponse.replace(`body{font-family: sans-serif;}`, `body{font-family: sans-serif;margin:0;}table {border-collapse:collapse;border-spacing:0;}td,th{padding: 0;}`);
-        updatedResponse = updatedResponse.replace(/<link.*.css'>/g, ``);
+        updatedResponse = updatedResponse.replace(`style='p`, `style='margin:0; p'`);
+        // updatedResponse = updatedResponse.replace(`body{font-family: sans-serif;}`, `body{font-family: sans-serif;margin:0;}table {border-collapse:collapse;border-spacing:0;}td,th{padding: 0;}`);
+        // updatedResponse = updatedResponse.replace(/<link.*.css'>/g, ``);
 
         const $ = cheerio.load(response.data);
 
@@ -138,8 +138,8 @@ exports.getSngplBill = async (req, res) => {
 
         // Convert the difference to days
         const daysDifference = Math.ceil(timeDifference / (1000 * 3600 * 24));
-		
-		
+
+
 
 
         const billDetails = {
