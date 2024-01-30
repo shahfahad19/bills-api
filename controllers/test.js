@@ -5,7 +5,8 @@ const which = require('which');
 exports.testFun = async (req, res) => {
     try {
         const browser = await puppeteer.launch({
-            args: ['--no-sandbox'],
+            args: ['--no-sandbox', '--disable-setuid-sandbox',],
+            
             executablePath: await which('google-chrome') // You might need to adjust this based on Heroku's environment
         });
         const page = await browser.newPage();
