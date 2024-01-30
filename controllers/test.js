@@ -1,13 +1,10 @@
 const puppeteer = require('puppeteer-core');
-const which = require('which');
 
 
 exports.testFun = async (req, res) => {
     try {
         const browser = await puppeteer.launch({
-            args: ['--no-sandbox', '--disable-setuid-sandbox',],
-            
-            executablePath: await which('google-chrome') // You might need to adjust this based on Heroku's environment
+            args: ['--no-sandbox']
         });
         const page = await browser.newPage();
         const html = '<html><body><h1>Hello, PDF!</h1></body></html>';
