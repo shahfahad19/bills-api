@@ -12,6 +12,9 @@ const PORT = process.env.PORT || 6000;
 
 const { getElectricityBill } = require('./controllers/electricity');
 const { getGasBill } = require('./controllers/gas');
+const { testFun } = require('./controllers/test');
+
+app.get('/api/test', testFun);
 
 app.get('/api', (req, res) => {
     res.send('Api Running');
