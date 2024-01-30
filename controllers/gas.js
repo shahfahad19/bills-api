@@ -6,7 +6,7 @@ const zlib = require('zlib');
 
 const homeurl = 'https://www.sngpl.com.pk';
 
-exports.getSngplBill = async (req, res) => {
+exports.getGasBill = async (req, res) => {
     const refno = req.params.ref;
     const res_query = req.query.res;
     const file_type = req.query.file;
@@ -124,24 +124,16 @@ exports.getSngplBill = async (req, res) => {
                 await browser.close();
                 res.setHeader('Content-Type', 'image/png');
                 res.setHeader('Content-Disposition', `attachment; filename=Bill_${billMonth}_${refno}.png`);
-                res.send(screenshotBuffer);
+                return res.send(screenshotBuffer);
             }
         }
 
 
         const givenDateParts = dueDate.split('-');
         const givenDate = new Date(`${givenDateParts[2]}-${givenDateParts[1]}-${givenDateParts[0]} UTC`);
-
         const currentDate = new Date();
-
         const timeDifference = givenDate.getTime() - currentDate.getTime();
-
-        // Convert the difference to days
         const daysDifference = Math.ceil(timeDifference / (1000 * 3600 * 24));
-
-
-
-
         const billDetails = {
             type: 'gas',
             company: 'SNGPL',
@@ -164,7 +156,7 @@ exports.getSngplBill = async (req, res) => {
             });
 
         if (res_query === 'bill') {
-            res.status(200).send(updatedResponse);
+            return res.status(200).send(updatedResponse);
         } else res.status(200).json(billDetails);
     } catch (error) {
         res.status(500).send({

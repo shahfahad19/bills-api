@@ -3,7 +3,6 @@ const cheerio = require('cheerio');
 const zlib = require('zlib');
 const puppeteer = require('puppeteer-core');
 
-
 exports.getElectricityBill = async (req, res, next) => {
     const refno = req.params.ref;
     if (refno.length < 14) {
@@ -83,7 +82,7 @@ exports.getElectricityBill = async (req, res, next) => {
                 await browser.close();
                 res.setHeader('Content-Type', 'image/png');
                 res.setHeader('Content-Disposition', `attachment; filename=Bill_${billMonth}_${refno}.png`);
-                res.send(screenshotBuffer);
+                return res.send(screenshotBuffer);
             }
         }
 
@@ -119,10 +118,10 @@ exports.getElectricityBill = async (req, res, next) => {
             });
 
         if (res_query === 'bill') {
-            res.status(200).send(updatedResponse);
+            return res.status(200).send(updatedResponse);
         } else res.status(200).json(billDetails);
     } catch (error) {
-        res.status(500).send({
+        return res.status(500).send({
             error: 'Error occured',
             message: error.message,
             err: error,
