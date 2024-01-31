@@ -62,8 +62,8 @@ exports.getElectricityBill = async (req, res, next) => {
         billMonth = monthFullName;
 
 
-        if (res.query === 'bill') {
-            res.status(200).send(updatedResponse);
+        if (res_query === 'bill') {
+            return res.status(200).send(updatedResponse);
         }
         else if (res_query === 'download') {
             //const browser = await puppeteer.connect({
