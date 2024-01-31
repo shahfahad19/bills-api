@@ -3,7 +3,6 @@ const cheerio = require('cheerio');
 const puppeteer = require('puppeteer');
 const zlib = require('zlib');
 
-
 const homeurl = 'https://www.sngpl.com.pk';
 
 exports.getGasBill = async (req, res) => {
@@ -28,8 +27,6 @@ exports.getGasBill = async (req, res) => {
         // updatedResponse = updatedResponse.replace(/<link.*.css'>/g, ``);
 
         const $ = cheerio.load(response.data);
-
-
 
         const rows = $('.sheet > div:nth-child(2) > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(4) > td:nth-child(2) > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(3) > td:nth-child(1) > table:nth-child(1) > tbody:nth-child(1)').find('tr');
 
@@ -103,64 +100,66 @@ exports.getGasBill = async (req, res) => {
             .text()
             .trim();
 
-        if (res_query === 'download') {
+        if (res_query === 'bill') {
+            return res.status(200).send(updatedResponse);
+        }
+        else if (res_query === 'download') {
             //const browser = await puppeteer.connect({
             //     browserWSEndpoint: `wss://chrome.browserless.io?token=e39874c2-d422-4520-a91a-12d596b382e3`,
             // });
+
             const browser = await puppeteer.launch({
                 args: ['--no-sandbox']
             });
             const page = await browser.newPage();
             await page.setContent(updatedResponse);
 
+
             if (file_type === 'pdf') {
-                const pdfBuffer = await page.pdf({ format: 'A4' });
-                await browser.close();
+                const pdfBuffer = await page.pdf({ format: 'A3' });
                 res.setHeader('Content-Type', 'application/pdf');
-                res.setHeader('Content-Disposition', `attachment; filename=SNGPL_bill_${billMonth}_${refno}.pdf`);
-                return res.send(pdfBuffer);
+                res.setHeader('Content-Disposition', `attachment; filename=${company}_bill_${billMonth}_${refno}.pdf`);
+                res.send(pdfBuffer);
             } else {
                 await page.setViewport({ width: 400, height: 600 });
                 const screenshotBuffer = await page.screenshot({
                     fullPage: true,
                 });
-                await browser.close();
                 res.setHeader('Content-Type', 'image/png');
-                res.setHeader('Content-Disposition', `attachment; filename=Bill_${billMonth}_${refno}.png`);
-                return res.send(screenshotBuffer);
+                res.setHeader('Content-Disposition', `attachment; filename=${company}_bill_${billMonth}_${refno}.png`);
+                res.send(screenshotBuffer);
             }
+
+            await browser.close();
+
         }
 
 
-        const givenDateParts = dueDate.split('-');
-        const givenDate = new Date(`${givenDateParts[2]}-${givenDateParts[1]}-${givenDateParts[0]} UTC`);
-        const currentDate = new Date();
-        const timeDifference = givenDate.getTime() - currentDate.getTime();
-        const daysDifference = Math.ceil(timeDifference / (1000 * 3600 * 24));
-        const billDetails = {
-            type: 'gas',
-            company: 'SNGPL',
-            ref: refno,
-            bill_name: billName,
-            units: units + ' HM3',
-            bill_month: billMonth,
-            reading_date: convertDate(readingDate),
-            current_bill: currentBill.replaceAll(',', ''),
-            after_due_bill: afterDueDateBill.replaceAll(',', ''),
-            due_date: convertDate(dueDate),
-            remaining_days: daysDifference,
-            past_data: pastData,
-            bill_data: compressText(updatedResponse.replace(/\s+/g, ' '))
-        };
+        else {
+            const givenDateParts = dueDate.split('-');
+            const givenDate = new Date(`${givenDateParts[2]}-${givenDateParts[1]}-${givenDateParts[0]} UTC`);
+            const currentDate = new Date();
+            const timeDifference = givenDate.getTime() - currentDate.getTime();
+            const daysDifference = Math.ceil(timeDifference / (1000 * 3600 * 24));
+            const billDetails = {
+                type: 'gas',
+                company: 'SNGPL',
+                ref: refno,
+                bill_name: billName,
+                units: units + ' HM3',
+                bill_month: billMonth,
+                reading_date: convertDate(readingDate),
+                current_bill: currentBill.replaceAll(',', ''),
+                after_due_bill: afterDueDateBill.replaceAll(',', ''),
+                due_date: convertDate(dueDate),
+                remaining_days: daysDifference,
+                past_data: pastData,
+                bill_data: compressText(updatedResponse.replace(/\s+/g, ' '))
+            };
 
-        if (currentBill === '')
-            res.status(404).json({
-                message: 'Bill not found',
-            });
 
-        if (res_query === 'bill') {
-            return res.status(200).send(updatedResponse);
-        } else res.status(200).json(billDetails);
+            res.status(200).json(billDetails);
+        }
     } catch (error) {
         res.status(500).send({
             error: 'Error occured',

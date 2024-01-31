@@ -62,7 +62,10 @@ exports.getElectricityBill = async (req, res, next) => {
         billMonth = monthFullName;
 
 
-        if (res_query === 'download') {
+        if (res.query === 'bill') {
+            res.status(200).send(updatedResponse);
+        }
+        else if (res_query === 'download') {
             //const browser = await puppeteer.connect({
             //     browserWSEndpoint: `wss://chrome.browserless.io?token=e39874c2-d422-4520-a91a-12d596b382e3`,
             // });
@@ -70,72 +73,56 @@ exports.getElectricityBill = async (req, res, next) => {
             const browser = await puppeteer.launch({
                 args: ['--no-sandbox']
             });
-            try {
-                if (file_type === 'pdf') {
-                    const page = await browser.newPage();
-                    await page.setContent(updatedResponse);
-                    const pdfBuffer = await page.pdf({ format: 'A3' });
-                    await browser.close();
-                    res.setHeader('Content-Type', 'application/pdf');
-                    res.setHeader('Content-Disposition', `attachment; filename=${company}_bill_${billMonth}_${refno}.pdf`);
-                    res.send(pdfBuffer);
-                } else {
+            const page = await browser.newPage();
+            await page.setContent(updatedResponse);
 
-                    const page = await browser.newPage();
-                    await page.setContent(updatedResponse);
-                    await page.setViewport({ width: 400, height: 600 });
-                    const screenshotBuffer = await page.screenshot({
-                        fullPage: true,
-                    });
-                    await browser.close();
-                    res.setHeader('Content-Type', 'image/png');
-                    res.setHeader('Content-Disposition', `attachment; filename=${company}_bill_${billMonth}_${refno}.png`);
-                    res.send(screenshotBuffer);
-                }
 
-            } catch (error) {
-                console.error('Error generating PDF:', error);
+            if (file_type === 'pdf') {
+                const pdfBuffer = await page.pdf({ format: 'A3' });
+                res.setHeader('Content-Type', 'application/pdf');
+                res.setHeader('Content-Disposition', `attachment; filename=${company}_bill_${billMonth}_${refno}.pdf`);
+                res.send(pdfBuffer);
+            } else {
+                await page.setViewport({ width: 400, height: 600 });
+                const screenshotBuffer = await page.screenshot({
+                    fullPage: true,
+                });
+                res.setHeader('Content-Type', 'image/png');
+                res.setHeader('Content-Disposition', `attachment; filename=${company}_bill_${billMonth}_${refno}.png`);
+                res.send(screenshotBuffer);
             }
-            finally {
-                await browser.close();
-                return;
 
-            }
+            await browser.close();
 
         }
-        const currentBill = $(selectors.currentBill).text().trim();
-        const afterDueDateBill = $(selectors.afterDueDateBill).text().trim();
-        const dueDate = $(selectors.dueDate).text().trim();
-        const billName = $(selectors.billName).text().trim();
-        const units = $(selectors.units).text().trim();
-        const readingDate = $(selectors.readingDate).text().trim();
+        else {
+            const currentBill = $(selectors.currentBill).text().trim();
+            const afterDueDateBill = $(selectors.afterDueDateBill).text().trim();
+            const dueDate = $(selectors.dueDate).text().trim();
+            const billName = $(selectors.billName).text().trim();
+            const units = $(selectors.units).text().trim();
+            const readingDate = $(selectors.readingDate).text().trim();
 
-        const daysRemaining = Math.ceil((new Date(dueDate + " UTC").getTime() - new Date().getTime()) / (1000 * 3600 * 24));
+            const daysRemaining = Math.ceil((new Date(dueDate + " UTC").getTime() - new Date().getTime()) / (1000 * 3600 * 24));
 
-        const billDetails = {
-            type: 'electricity',
-            company,
-            ref: refno,
-            bill_name: billName,
-            units: units + ' Units',
-            bill_month: billMonth,
-            reading_date: convertDate(readingDate),
-            current_bill: currentBill,
-            after_due_bill: afterDueDateBill,
-            due_date: convertDate(dueDate),
-            remaining_days: daysRemaining,
-            past_data: pastData,
-            bill_data: compressText(updatedResponse.replace(/\s+/g, ' '))
-        };
+            const billDetails = {
+                type: 'electricity',
+                company,
+                ref: refno,
+                bill_name: billName,
+                units: units + ' Units',
+                bill_month: billMonth,
+                reading_date: convertDate(readingDate),
+                current_bill: currentBill,
+                after_due_bill: afterDueDateBill,
+                due_date: convertDate(dueDate),
+                remaining_days: daysRemaining,
+                past_data: pastData,
+                bill_data: compressText(updatedResponse.replace(/\s+/g, ' '))
+            };
+            res.status(200).json(billDetails);
+        }
 
-        if (currentBill === '')
-            res.status(404).json({
-                message: 'Bill not found',
-            });
-
-        if (res_query === 'bill') {
-            return res.status(200).send(updatedResponse);
-        } else res.status(200).json(billDetails);
     } catch (error) {
         return res.status(500).send({
             error: 'Error occured',
