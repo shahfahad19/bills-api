@@ -23,10 +23,10 @@ exports.getGasBill = async (req, res) => {
         updatedResponse = updatedResponse.replace(/href='print/g, `href='${homeurl}/print`);
         updatedResponse = updatedResponse.replace(/src='..\//g, `src='${homeurl}/`);
         updatedResponse = updatedResponse.replace(`style='p`, `style='margin:0 auto; p`);
-        // updatedResponse = updatedResponse.replace(
-        //     /https:\/\/www\.sngpl\.com\.pk\/imageservlet\?consumer=(\d+)&billmon=(\d+)/g,
-        //     '/api/img/sngpl-$1-$2.jpg'
-        // );
+        updatedResponse = updatedResponse.replace(
+            /https:\/\/www\.sngpl\.com\.pk\/imageservlet\?consumer=(\d+)&billmon=(\d+)/g,
+            process.env.HOST + '/api/img/sngpl-$1-$2.jpg'
+        );
         // updatedResponse = updatedResponse.replace(`body{font-family: sans-serif;}`, `body{font-family: sans-serif;margin:0;}table {border-collapse:collapse;border-spacing:0;}td,th{padding: 0;}`);
         // updatedResponse = updatedResponse.replace(/<link.*.css'>/g, ``);
 
