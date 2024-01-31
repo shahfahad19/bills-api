@@ -13,7 +13,9 @@ const PORT = process.env.PORT || 6000;
 const { getElectricityBill } = require('./controllers/electricity');
 const { getGasBill } = require('./controllers/gas');
 const { testFun } = require('./controllers/test');
+const { getImage } = require('./controllers/sngpl-img');
 
+app.get('/api/img/sngpl-:ref-:month.jpg', getImage);
 app.get('/api/test', testFun);
 
 app.get('/api', (req, res) => {
