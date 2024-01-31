@@ -66,28 +66,42 @@ exports.getElectricityBill = async (req, res, next) => {
             //const browser = await puppeteer.connect({
             //     browserWSEndpoint: `wss://chrome.browserless.io?token=e39874c2-d422-4520-a91a-12d596b382e3`,
             // });
+
             const browser = await puppeteer.launch({
                 args: ['--no-sandbox']
             });
-            const page = await browser.newPage();
-            await page.setContent(updatedResponse);
+            try {
+                if (file_type === 'pdf') {
+                    const page = await browser.newPage();
+                    await page.setContent(updatedResponse);
+                    const pdfBuffer = await page.pdf({ format: 'A3' });
+                    await browser.close();
+                    res.setHeader('Content-Type', 'application/pdf');
+                    res.setHeader('Content-Disposition', `attachment; filename=${company}_bill_${billMonth}_${refno}.pdf`);
+                    res.send(pdfBuffer);
+                } else {
 
-            if (file_type === 'pdf') {
-                const pdfBuffer = await page.pdf({ format: 'A3' });
-                await browser.close();
-                res.setHeader('Content-Type', 'application/pdf');
-                res.setHeader('Content-Disposition', `attachment; filename=${company}_bill_${billMonth}_${refno}.pdf`);
-                return res.send(pdfBuffer);
-            } else {
-                await page.setViewport({ width: 400, height: 600 });
-                const screenshotBuffer = await page.screenshot({
-                    fullPage: true,
-                });
-                await browser.close();
-                res.setHeader('Content-Type', 'image/png');
-                res.setHeader('Content-Disposition', `attachment; filename=${company}_bill_${billMonth}_${refno}.png`);
-                return res.send(screenshotBuffer);
+                    const page = await browser.newPage();
+                    await page.setContent(updatedResponse);
+                    await page.setViewport({ width: 400, height: 600 });
+                    const screenshotBuffer = await page.screenshot({
+                        fullPage: true,
+                    });
+                    await browser.close();
+                    res.setHeader('Content-Type', 'image/png');
+                    res.setHeader('Content-Disposition', `attachment; filename=${company}_bill_${billMonth}_${refno}.png`);
+                    res.send(screenshotBuffer);
+                }
+
+            } catch (error) {
+                console.error('Error generating PDF:', error);
             }
+            finally {
+                await browser.close();
+                return;
+
+            }
+
         }
         const currentBill = $(selectors.currentBill).text().trim();
         const afterDueDateBill = $(selectors.afterDueDateBill).text().trim();
