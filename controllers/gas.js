@@ -1,6 +1,6 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
-const puppeteer = require('puppeteer-core');
+const puppeteer = require('puppeteer');
 const zlib = require('zlib');
 
 
