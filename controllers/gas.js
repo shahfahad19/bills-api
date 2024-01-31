@@ -23,7 +23,7 @@ exports.getGasBill = async (req, res) => {
         let updatedResponse = response.data;
         updatedResponse = updatedResponse.replace(/href='print/g, `href='${homeurl}/print`);
         updatedResponse = updatedResponse.replace(/src='..\//g, `src='${homeurl}/`);
-        updatedResponse = updatedResponse.replace(`style='p`, `style='margin:0; p'`);
+        updatedResponse = updatedResponse.replace(`style='p`, `style='margin:0 auto; p`);
         // updatedResponse = updatedResponse.replace(`body{font-family: sans-serif;}`, `body{font-family: sans-serif;margin:0;}table {border-collapse:collapse;border-spacing:0;}td,th{padding: 0;}`);
         // updatedResponse = updatedResponse.replace(/<link.*.css'>/g, ``);
 
@@ -104,8 +104,11 @@ exports.getGasBill = async (req, res) => {
             .trim();
 
         if (res_query === 'download') {
-            const browser = await puppeteer.connect({
-                browserWSEndpoint: `wss://chrome.browserless.io?token=e39874c2-d422-4520-a91a-12d596b382e3`,
+            //const browser = await puppeteer.connect({
+            //     browserWSEndpoint: `wss://chrome.browserless.io?token=e39874c2-d422-4520-a91a-12d596b382e3`,
+            // });
+            const browser = await puppeteer.launch({
+                args: ['--no-sandbox']
             });
             const page = await browser.newPage();
             await page.setContent(updatedResponse);
@@ -114,7 +117,7 @@ exports.getGasBill = async (req, res) => {
                 const pdfBuffer = await page.pdf({ format: 'A4' });
                 await browser.close();
                 res.setHeader('Content-Type', 'application/pdf');
-                res.setHeader('Content-Disposition', `attachment; filename=Bill_${billMonth}_${refno}.pdf`);
+                res.setHeader('Content-Disposition', `attachment; filename=SNGPL_bill_${billMonth}_${refno}.pdf`);
                 return res.send(pdfBuffer);
             } else {
                 await page.setViewport({ width: 400, height: 600 });

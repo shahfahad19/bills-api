@@ -63,64 +63,31 @@ exports.getElectricityBill = async (req, res, next) => {
 
 
         if (res_query === 'download') {
-            if (process.env.AWS_LAMBDA_FUNCTION_VERSION) {
-                const chromium = require('chrome-aws-lambda');
-                const puppeteer = require('puppeteer-core');
-                const options = {
-                    args: [...chromium.args, '--hide-scrollbars', '--disable-web-security'],
-                    defaultViewport: chromium.defaultViewport,
-                    executablePath: await chromium.executablePath,
-                    headless: true,
-                    ignoreHTTPSErrors: true,
-                };
+            //const browser = await puppeteer.connect({
+            //     browserWSEndpoint: `wss://chrome.browserless.io?token=e39874c2-d422-4520-a91a-12d596b382e3`,
+            // });
+            const browser = await puppeteer.launch({
+                args: ['--no-sandbox']
+            });
+            const page = await browser.newPage();
+            await page.setContent(updatedResponse);
 
-                const browser = await puppeteer.connect(options);
-                const page = await browser.newPage();
-                await page.setContent(updatedResponse);
-
-                if (file_type === 'pdf') {
-                    const pdfBuffer = await page.pdf({ format: 'A3' });
-                    await browser.close();
-                    res.setHeader('Content-Type', 'application/pdf');
-                    res.setHeader('Content-Disposition', `attachment; filename=Bill_${billMonth}_${refno}.pdf`);
-                    return res.send(pdfBuffer);
-                } else {
-                    await page.setViewport({ width: 600, height: 1200 });
-                    const screenshotBuffer = await page.screenshot({
-                        fullPage: true,
-                    });
-                    await browser.close();
-
-                    res.setHeader('Content-Type', 'image/png');
-                    res.setHeader('Content-Disposition', `attachment; filename=Bill_${billMonth}_${refno}.png`);
-                    return res.send(screenshotBuffer);
-                }
-
+            if (file_type === 'pdf') {
+                const pdfBuffer = await page.pdf({ format: 'A3' });
+                await browser.close();
+                res.setHeader('Content-Type', 'application/pdf');
+                res.setHeader('Content-Disposition', `attachment; filename=${company}_bill_${billMonth}_${refno}.pdf`);
+                return res.send(pdfBuffer);
             } else {
-                const browser = await puppeteer.connect({
-                    browserWSEndpoint: `wss://chrome.browserless.io?token=e39874c2-d422-4520-a91a-12d596b382e3`,
+                await page.setViewport({ width: 400, height: 600 });
+                const screenshotBuffer = await page.screenshot({
+                    fullPage: true,
                 });
-                const page = await browser.newPage();
-                await page.setContent(updatedResponse);
-
-                if (file_type === 'pdf') {
-                    const pdfBuffer = await page.pdf({ format: 'A3' });
-                    await browser.close();
-                    res.setHeader('Content-Type', 'application/pdf');
-                    res.setHeader('Content-Disposition', `attachment; filename=Bill_${billMonth}_${refno}.pdf`);
-                    return res.send(pdfBuffer);
-                } else {
-                    await page.setViewport({ width: 400, height: 600 });
-                    const screenshotBuffer = await page.screenshot({
-                        fullPage: true,
-                    });
-                    await browser.close();
-                    res.setHeader('Content-Type', 'image/png');
-                    res.setHeader('Content-Disposition', `attachment; filename=Bill_${billMonth}_${refno}.png`);
-                    return res.send(screenshotBuffer);
-                }
+                await browser.close();
+                res.setHeader('Content-Type', 'image/png');
+                res.setHeader('Content-Disposition', `attachment; filename=${company}_bill_${billMonth}_${refno}.png`);
+                return res.send(screenshotBuffer);
             }
-
         }
         const currentBill = $(selectors.currentBill).text().trim();
         const afterDueDateBill = $(selectors.afterDueDateBill).text().trim();
