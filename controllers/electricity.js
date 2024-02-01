@@ -5,15 +5,19 @@ const puppeteer = require('puppeteer');
 
 exports.getElectricityBill = async (req, res, next) => {
     const refno = req.params.ref;
-    if (refno.length < 14) {
-        return next();
-    }
     const res_query = req.query.res;
     const file_type = req.query.file;
     const [company, url] = getCompany(refno);
 
     try {
         const response = await axios.get(url);
+        if (response.data.length < 5000) {
+            res.status(400).send({
+                error: 'Error occured',
+                message: 'Bill not found'
+            });
+        }
+
         let homeurl = url;
         homeurl = url.replace('http://', '');
         homeurl = url.replace('https://', '');

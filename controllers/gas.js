@@ -18,6 +18,12 @@ exports.getGasBill = async (req, res) => {
 
     try {
         const response = await axios.get(url);
+        if (response.data.length < 5000) {
+            res.status(400).send({
+                error: 'Error occured',
+                message: 'Bill not found'
+            });
+        }
 
         let updatedResponse = response.data;
         updatedResponse = updatedResponse.replace(/href='print/g, `href='${homeurl}/print`);

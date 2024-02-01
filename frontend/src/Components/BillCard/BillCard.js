@@ -10,11 +10,15 @@ const BillCard = ({ refNo }) => {
 
     useState(() => {
         axios
-            .get(`https://billsapp.vercel.app/api/${billType}/${refNo}`)
+            .get(`https://billsapp.vercel.app/api/bill/${refNo}`)
             .then((response) => {
                 setBill(response.data);
             })
-            .catch((error) => { });
+            .catch((error) => {
+                setBill({
+                    bill_name: 'Not available'
+                })
+            });
     }, [refNo]);
 
     const viewBill = () => {
@@ -74,11 +78,9 @@ const BillCard = ({ refNo }) => {
                             <Link to={`/bill/${refNo}`} className='btn btn-xs btn-primary'>
                                 View Bill
                             </Link>
-                            {billType === 'pesco' && (
-                                <p className='font-semibold text-secondary text-sm'>
-                                    {bill.units} Units
-                                </p>
-                            )}
+                            <p className='font-semibold text-secondary text-sm'>
+                                {bill.units}
+                            </p>
                             <p className='text-success font-bold'>Rs. {bill.current_bill}</p>
 
 

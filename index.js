@@ -1,69 +1,19 @@
-// create an express app
+// app.js or index.js
 const express = require('express');
 const dotenv = require('dotenv');
-const app = express();
 const cors = require('cors');
 const path = require('path');
+const routes = require('./routes');
 
 dotenv.config({ path: './config.env' });
+const app = express();
+
 app.use(cors({ origin: '*' }));
+app.use(express.static(path.join(__dirname, 'frontend/build')));
 
 const PORT = process.env.PORT || 6000;
 
-const { getElectricityBill } = require('./controllers/electricity');
-const { getGasBill } = require('./controllers/gas');
-const { testFun } = require('./controllers/test');
-const { getImage } = require('./controllers/sngpl-img');
-
-app.get('/api/img/sngpl-:ref-:month.jpg', getImage);
-app.get('/api/test', testFun);
-
-app.get('/api', (req, res) => {
-    res.send('Api Running');
-});
-
-app.get('/api/bill/:ref', getElectricityBill, getGasBill);
-
-app.get('/api/pesco/:ref', (req, res) => {
-    res.json({
-        ref: '',
-        bill_name: 'Update Required',
-        units: '',
-        bill_month: '',
-        reading_date: '',
-        current_bill: '',
-        after_due_bill: '',
-        due_date: '',
-        remaining_days: 0
-    });
-});
-
-app.get('/api/sngpl/:ref', (req, res) => {
-    res.json({
-        ref: '',
-        bill_name: 'Update Required',
-        units: '',
-        bill_month: '',
-        reading_date: '',
-        current_bill: '',
-        after_due_bill: '',
-        due_date: '',
-        remaining_days: 0
-    });
-});
-
-app.get('/api/version', (req, res) => {
-    res.json({
-        versionCode: 2,
-        versionName: '1.1',
-        message: 'A new update is available',
-        appLink: 'https://google.com',
-        skipable: true
-    })
-});
-
-app.use(express.static(path.join(__dirname, 'frontend/build')));
-
+app.use('/api', routes);
 
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'frontend/build', 'index.html'));

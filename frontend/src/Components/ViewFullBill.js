@@ -6,18 +6,15 @@ import { Helmet } from 'react-helmet';
 const ViewFullBill = () => {
     const params = useParams();
     const ref = params.refNo;
-    const billType = ref.length === 14 ? 'pesco' : 'sngpl';
 
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        // Remove the viewport meta tag
         const viewportMeta = document.querySelector('meta[name="viewport"]');
         if (viewportMeta) {
             viewportMeta.remove();
         }
 
-        // Re-add the original viewport meta tag when unmounting
         return () => {
             const newViewportMeta = document.createElement('meta');
             newViewportMeta.name = 'viewport';
@@ -36,13 +33,13 @@ const ViewFullBill = () => {
                 <div className='flex space-x-2 p-2'>
                     <a
                         className='btn btn-primary btn-xs'
-                        href={`https://billsapp.vercel.app/api/${billType}/${ref}?res=download`}
+                        href={`https://billsapp.vercel.app/api/bill/${ref}?res=download`}
                     >
                         Download Image
                     </a>
                     <a
                         className='btn btn-primary btn-xs'
-                        href={`https://billsapp.vercel.app/api/${billType}/${ref}?res=download&file=pdf`}
+                        href={`https://billsapp.vercel.app/api/bill/${ref}?res=download&file=pdf`}
                     >
                         Download PDF
                     </a>
@@ -55,7 +52,7 @@ const ViewFullBill = () => {
                 <iframe
                     title='bill'
                     className='h-full w-full'
-                    src={`https://billsapp.vercel.app/api/${billType}/${ref}?res=bill`}
+                    src={`https://billsapp.vercel.app/api/bill/${ref}?res=bill`}
                     onLoad={handleIframeLoad}
                 ></iframe>
             </div>
