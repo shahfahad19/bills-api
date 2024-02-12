@@ -35,6 +35,7 @@ exports.getGasBill = async (req, res) => {
         );
         // updatedResponse = updatedResponse.replace(`body{font-family: sans-serif;}`, `body{font-family: sans-serif;margin:0;}table {border-collapse:collapse;border-spacing:0;}td,th{padding: 0;}`);
         // updatedResponse = updatedResponse.replace(/<link.*.css'>/g, ``);
+        updatedResponse = updatedResponse.replace(`<link rel='stylesheet' href='https://www.sngpl.com.pk/print-css/paper.css'>`, `<style>.sheet,body{margin:0}@page{margin:0}.sheet{position:relative;box-sizing:border-box;page-break-after:always}body.A3 .sheet{width:297mm;height:419mm}body.A3.landscape .sheet{width:420mm;height:296mm}body.A4 .sheet{width:210mm;height:296mm}body.A4.landscape .sheet{width:297mm;height:209mm}body.A5 .sheet{width:148mm;height:209mm}body.A5.landscape .sheet{width:210mm;height:147mm}.sheet.padding-10mm{padding:10mm}.sheet.padding-15mm{padding:15mm}.sheet.padding-20mm{padding:20mm}.sheet.padding-25mm{padding:25mm}@media screen{.sheet{background:#fff;box-shadow:0 .5mm 2mm rgba(0,0,0,.3)}}</style>`);
 
         const $ = cheerio.load(response.data);
 
