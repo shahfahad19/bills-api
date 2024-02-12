@@ -42,6 +42,8 @@ exports.getElectricityBill = async (req, res, next) => {
         updatedResponse = updatedResponse.replace(/action="\.\//g, `action="${homeurl}/pescobill/`);
         updatedResponse = updatedResponse.replace(/<script t.*script>/g, ``);
         updatedResponse = updatedResponse.replace('http://snap', 'https://snap');
+        updatedResponse = updatedResponse.replace('<meta charset="utf-16" />', `<meta charset="utf-16" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">`);
         const $ = cheerio.load(updatedResponse);
 
         const rows = $('.nested6 .content');

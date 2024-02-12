@@ -38,6 +38,7 @@ exports.getGasBill = async (req, res) => {
         updatedResponse = updatedResponse.replace(`<link rel='stylesheet' href='https://www.sngpl.com.pk/print-css/paper.css'>`, `<style>.sheet,body{margin:0}@page{margin:0}.sheet{position:relative;box-sizing:border-box;page-break-after:always}body.A3 .sheet{width:297mm;height:419mm}body.A3.landscape .sheet{width:420mm;height:296mm}body.A4 .sheet{width:210mm;height:296mm}body.A4.landscape .sheet{width:297mm;height:209mm}body.A5 .sheet{width:148mm;height:209mm}body.A5.landscape .sheet{width:210mm;height:147mm}.sheet.padding-10mm{padding:10mm}.sheet.padding-15mm{padding:15mm}.sheet.padding-20mm{padding:20mm}.sheet.padding-25mm{padding:25mm}@media screen{.sheet{background:#fff;box-shadow:0 .5mm 2mm rgba(0,0,0,.3)}}</style>`);
         updatedResponse = updatedResponse.replace(`<meta http-equiv='Content-Type' content='text/html; charset=utf-8' />`, `<meta charset="utf-16" /><meta name="viewport" content="width=device-width, initial-scale=1">`);
         updatedResponse = updatedResponse.replace(`<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">`, `<!DOCTYPE html>`);
+        updatedResponse = updatedResponse.replaceAll(`'class`, `' class`);
 
         const $ = cheerio.load(response.data);
 
