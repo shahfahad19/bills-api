@@ -63,7 +63,7 @@ router.get('/version', (req, res) => {
         versionName: '1.2',
         message: 'A new update is available!',
         appLink: 'https://github.com/shahfahad19/mybills/releases/download/app/MyBills.v1.2.apk',
-        skipable: true
+        skipable: false
     });
 });
 
