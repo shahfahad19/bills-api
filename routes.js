@@ -60,9 +60,9 @@ router.get('/sngpl/:ref', (req, res) => {
 router.get('/version', (req, res) => {
     res.json({
         versionCode: 2,
-        versionName: '1.1',
-        message: 'A new update is available',
-        appLink: 'https://google.com',
+        versionName: '1.2',
+        message: 'A new update is available!',
+        appLink: 'https://github.com/shahfahad19/mybills/releases/download/app/MyBills.v1.2.apk',
         skipable: true
     });
 });
