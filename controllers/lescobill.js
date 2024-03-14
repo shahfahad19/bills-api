@@ -1,7 +1,6 @@
-const axios = require('axios');
+const http = require('http');
 const cheerio = require('cheerio');
 const zlib = require('zlib');
-const puppeteer = require('puppeteer');
 
 exports.getLescoBill = async (req, res, next) => {
     const refno = req.params.ref;
@@ -17,7 +16,6 @@ exports.getLescoBill = async (req, res, next) => {
         'Connection': 'keep-alive'
     };
 
-    /* Form data for first request */
     const formData = new URLSearchParams();
     formData.append('txtBatchNo', reference.batch);
     formData.append('txtSubDiv', reference.subDiv);
@@ -25,7 +23,6 @@ exports.getLescoBill = async (req, res, next) => {
     formData.append('cmbRU', reference.ru);
     formData.append('btnViewMenu', 'Customer Menu');
 
-    /* Form data for bill */
     const billFormData = new URLSearchParams();
     billFormData.append('BatchNo', reference.batch);
     billFormData.append('SubDiv', reference.subDiv);
@@ -34,82 +31,42 @@ exports.getLescoBill = async (req, res, next) => {
 
     try {
         // Main Request
-        const response = await axios.post(mainURL, formData, headers);
-        const cookies = response.headers['set-cookie'];
-        const cookieValue = cookies[0].split(';')[0];
-        headers.Cookie = cookieValue;
-
-        const captchaHeaders = {
-            Cookie: cookieValue
+        const mainOptions = {
+            method: 'POST',
+            headers: headers
         };
 
-        return res.send(cookieValue);
-        let codeValue = "";
+        const mainReq = http.request(mainURL, mainOptions, async (mainRes) => {
+            let data = '';
 
-        try {
-            await axios.get(captchaURL, { headers: captchaHeaders, maxRedirects: 0 });
-        } catch (error) {
-            const urlString = error.response.headers.location;
-            const startIdx = urlString.indexOf("code=") + 5;
-            const endIdx = urlString.indexOf("&", startIdx);
-
-            codeValue = urlString.substring(startIdx, endIdx);
-        }
-
-
-
-        delete headers.Cookie;
-        billFormData.append('CapCode', codeValue);
-        const billResponse = await axios.post(billURL, billFormData, headers);
-
-        let bill = billResponse.data;
-
-        // bill = bill.replaceAll('href="./', 'href="http://www.lesco.gov.pk:36247/');
-        // bill = bill.replaceAll('src="./', 'src="http://www.lesco.gov.pk:36247/');
-        bill = bill.replaceAll('src="Ima', 'src="http://www.lesco.gov.pk:36247/Ima');
-        bill = bill.replaceAll('src="js', 'src="http://www.lesco.gov.pk:36247/js');
-        const $ = cheerio.load(bill);
-        let billHtml = $('#page1-div').html();
-        billHtml = `<div id="page1 - div" style="position: relative; width: 885px; height: 1248px; margin: 0 auto; ">${billHtml}</div>`;
-        bill = bill.replace(/<form[^>]*>[\s\S]*?<\/form>/gi, billHtml);
-        bill = bill.replace(/<link[^>]*>[\s\S]*?\/>/gi, '');
-
-        const billName = $('#page1-div > table:nth-child(29) > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(1)').text().trim();
-        const units = $("p.ft13:nth-child(34)").text().trim();
-        const billMonth = $("p.ft14:nth-child(13) > b:nth-child(1)").text();
-        const currentBill = $('p.ft14:nth-child(158) > b:nth-child(1)').text();
-        const afterDueDateBill = $('p.ft14:nth-child(159) > b:nth-child(1)').text();
-        const dueDate = $('p.ft14:nth-child(155)').text();
-
-
-        const billDetails = {
-            type: 'electricity',
-            company: 'LESCO',
-            ref: refno.replaceAll(' ', ''),
-            bill_name: billName,
-            units: units + ' Units',
-            bill_month: abbrvToName(billMonth),
-            reading_date: 'N/A',
-            current_bill: currentBill,
-            after_due_bill: afterDueDateBill,
-            due_date: convertDate(dueDate),
-            remaining_days: 0,
-            past_data: [],
-            bill_data: compressText(bill.replace(/\s+/g, ' '))
-        };
-
-        if (billName === '') {
-            return res.status(400).send({
-                error: 'Error occured',
-                message: 'Bill not found'
+            mainRes.on('data', (chunk) => {
+                data += chunk;
             });
-        }
-        res.send(billDetails);
 
+            mainRes.on('end', async () => {
+                const cookies = mainRes.headers['set-cookie'];
+                const cookieValue = cookies[0].split(';')[0];
+                headers.Cookie = cookieValue;
+
+                const captchaHeaders = {
+                    Cookie: cookieValue
+                };
+
+                res.send(cookieValue);
+
+            });
+        });
+
+        mainReq.on('error', (error) => {
+            // Handle main request error
+        });
+
+        mainReq.write(formData.toString());
+        mainReq.end();
 
     } catch (error) {
         return res.status(500).send({
-            error: 'Error occured',
+            error: 'Error occurred',
             message: error.message,
             err: error,
         });
