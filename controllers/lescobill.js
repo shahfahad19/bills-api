@@ -13,7 +13,8 @@ exports.getLescoBill = async (req, res, next) => {
     let headers = {
         'Content-Type': 'application/x-www-form-urlencoded',
         'Origin': 'http://www.lesco.gov.pk:36269',
-        'Referer': 'http://www.lesco.gov.pk:36269/Modules/CustomerBill/CheckBill.asp'
+        'Referer': 'http://www.lesco.gov.pk:36269/Modules/CustomerBill/CheckBill.asp',
+        'Connection': 'keep-alive'
     };
 
     /* Form data for first request */
