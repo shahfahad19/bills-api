@@ -7,9 +7,9 @@ exports.getLescoBill = async (req, res, next) => {
     const refno = req.params.ref;
     const reference = convertStringToObject(refno);
 
-    const mainURL = 'http://www.lesco.gov.pk:36269/Modules/CustomerBill/CustomerMenu.asp';
-    const captchaURL = 'http://www.lesco.gov.pk:36269/Modules/CustomerBill/codeimage.asp';
-    const billURL = "http://www.lesco.gov.pk:36247/Bill.aspx";
+    const mainURL = 'http://103.85.131.210:36269/Modules/CustomerBill/CustomerMenu.asp';
+    const captchaURL = 'http://103.85.131.210:36269/Modules/CustomerBill/codeimage.asp';
+    const billURL = "http://103.85.131.210:36247/Bill.aspx";
     let headers = {
         'Content-Type': 'application/x-www-form-urlencoded'
     };
