@@ -40,6 +40,7 @@ exports.getLescoBill = async (req, res, next) => {
             Cookie: cookieValue
         };
 
+        return res.send(cookieValue);
         let codeValue = "";
 
         try {
@@ -51,6 +52,8 @@ exports.getLescoBill = async (req, res, next) => {
 
             codeValue = urlString.substring(startIdx, endIdx);
         }
+
+
 
         delete headers.Cookie;
         billFormData.append('CapCode', codeValue);
