@@ -2,7 +2,6 @@ const axios = require('axios');
 const cheerio = require('cheerio');
 const zlib = require('zlib');
 const puppeteer = require('puppeteer');
-const https = require('https'); // Import the 'https' module
 
 exports.getLescoBill = async (req, res, next) => {
     if (!req.query.admin) {
@@ -38,15 +37,8 @@ exports.getLescoBill = async (req, res, next) => {
 
     try {
 
-        const axiosInstance = axios.create({
-            // Ignore SSL certificate errors
-            httpsAgent: new https.Agent({
-                rejectUnauthorized: false
-            })
-        });
-
         // Main Request
-        const response = await axiosInstance.post(mainURL, formData, headers);
+        const response = await axios.post(mainURL, formData, headers, { maxRedirects: 10 });
         const cookies = response.headers['set-cookie'];
         const cookieValue = cookies[0].split(';')[0];
         headers.Cookie = cookieValue;
@@ -58,7 +50,7 @@ exports.getLescoBill = async (req, res, next) => {
         let codeValue = "";
 
         try {
-            await axiosInstance.get(captchaURL, { headers: captchaHeaders, maxRedirects: 0 });
+            await axios.get(captchaURL, { headers: captchaHeaders, maxRedirects: 0 });
         } catch (error) {
             const urlString = error.response.headers.location;
             const startIdx = urlString.indexOf("code=") + 5;
@@ -71,7 +63,7 @@ exports.getLescoBill = async (req, res, next) => {
 
         delete headers.Cookie;
         billFormData.append('CapCode', codeValue);
-        const billResponse = await axiosInstance.post(billURL, billFormData, headers);
+        const billResponse = await axios.post(billURL, billFormData, headers);
 
         let bill = billResponse.data;
 
