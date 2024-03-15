@@ -2,12 +2,15 @@ const axios = require('axios');
 const cheerio = require('cheerio');
 const zlib = require('zlib');
 const puppeteer = require('puppeteer');
+const https = require('https'); // Import the 'https' module
 
 exports.getLescoBill = async (req, res, next) => {
-    return res.status(400).send({
-        error: 'Error occured',
-        message: 'LESCO bills are not supported yet!'
-    });
+    if (!req.query.admin) {
+        return res.status(400).send({
+            error: 'Error occured',
+            message: 'LESCO bills are not supported yet!'
+        });
+    }
     const refno = req.params.ref;
     const reference = convertStringToObject(refno);
 
@@ -34,8 +37,16 @@ exports.getLescoBill = async (req, res, next) => {
     billFormData.append('RU', reference.ru);
 
     try {
+
+        const axiosInstance = axios.create({
+            // Ignore SSL certificate errors
+            httpsAgent: new https.Agent({
+                rejectUnauthorized: false
+            })
+        });
+
         // Main Request
-        const response = await axios.post(mainURL, formData, headers);
+        const response = await axiosInstance.post(mainURL, formData, headers);
         const cookies = response.headers['set-cookie'];
         const cookieValue = cookies[0].split(';')[0];
         headers.Cookie = cookieValue;
@@ -47,7 +58,7 @@ exports.getLescoBill = async (req, res, next) => {
         let codeValue = "";
 
         try {
-            await axios.get(captchaURL, { headers: captchaHeaders, maxRedirects: 0 });
+            await axiosInstance.get(captchaURL, { headers: captchaHeaders, maxRedirects: 0 });
         } catch (error) {
             const urlString = error.response.headers.location;
             const startIdx = urlString.indexOf("code=") + 5;
@@ -60,7 +71,7 @@ exports.getLescoBill = async (req, res, next) => {
 
         delete headers.Cookie;
         billFormData.append('CapCode', codeValue);
-        const billResponse = await axios.post(billURL, billFormData, headers);
+        const billResponse = await axiosInstance.post(billURL, billFormData, headers);
 
         let bill = billResponse.data;
 
