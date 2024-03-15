@@ -38,7 +38,7 @@ exports.getLescoBill = async (req, res, next) => {
     try {
 
         // Main Request
-        const response = await axios.post(mainURL, formData, headers, { maxRedirects: 10 });
+        const response = await axios.post(mainURL, formData, headers, { maxRedirects: 0 });
         const cookies = response.headers['set-cookie'];
         const cookieValue = cookies[0].split(';')[0];
         headers.Cookie = cookieValue;
