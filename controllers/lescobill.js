@@ -37,32 +37,32 @@ exports.getLescoBill = async (req, res, next) => {
 
     try {
 
-        // Main Request
-        const response = await axios.post(mainURL, formData, headers, { maxRedirects: 0 });
-        const cookies = response.headers['set-cookie'];
-        const cookieValue = cookies[0].split(';')[0];
-        headers.Cookie = cookieValue;
+        // // Main Request
+        // const response = await axios.post(mainURL, formData, headers, { maxRedirects: 0 });
+        // const cookies = response.headers['set-cookie'];
+        // const cookieValue = cookies[0].split(';')[0];
+        // headers.Cookie = cookieValue;
 
-        const captchaHeaders = {
-            Cookie: cookieValue
-        };
+        // const captchaHeaders = {
+        //     Cookie: cookieValue
+        // };
 
-        let codeValue = "";
+        // let codeValue = "";
 
-        try {
-            await axios.get(captchaURL, { headers: captchaHeaders, maxRedirects: 0 });
-        } catch (error) {
-            const urlString = error.response.headers.location;
-            const startIdx = urlString.indexOf("code=") + 5;
-            const endIdx = urlString.indexOf("&", startIdx);
+        // try {
+        //     await axios.get(captchaURL, { headers: captchaHeaders, maxRedirects: 0 });
+        // } catch (error) {
+        //     const urlString = error.response.headers.location;
+        //     const startIdx = urlString.indexOf("code=") + 5;
+        //     const endIdx = urlString.indexOf("&", startIdx);
 
-            codeValue = urlString.substring(startIdx, endIdx);
-        }
+        //     codeValue = urlString.substring(startIdx, endIdx);
+        // }
 
 
 
-        delete headers.Cookie;
-        billFormData.append('CapCode', codeValue);
+        // delete headers.Cookie;
+        billFormData.append('CapCode', 'LTCK');
         const billResponse = await axios.post(billURL, billFormData, headers);
 
         let bill = billResponse.data;
