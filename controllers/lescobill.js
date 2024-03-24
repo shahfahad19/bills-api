@@ -129,7 +129,7 @@ exports.handleLescoBill = async (req, res, next) => {
         let bill = decompressText(bill_data);
 
         // bill = bill.replaceAll('href="./', 'href="http://www.lesco.gov.pk:36247/');
-        // bill = bill.replaceAll('src="./', 'src="http://www.lesco.gov.pk:36247/');
+        bill = bill.replaceAll('src="./', 'src="http://www.lesco.gov.pk:36247/');
         bill = bill.replaceAll('src="Ima', 'src="http://www.lesco.gov.pk:36247/Ima');
         bill = bill.replaceAll('src="js', 'src="http://www.lesco.gov.pk:36247/js');
         const $ = cheerio.load(bill);
