@@ -15,7 +15,7 @@ router.get('/', (req, res) => {
     res.send('Api Running');
 });
 
-router.get('/lescobill', handleLescoBill);
+router.post('/lescobill', handleLescoBill);
 
 router.get('/bill/:ref', (req, res) => {
     const ref = req.params.ref;
