@@ -147,6 +147,8 @@ exports.handleLescoBill = async (req, res, next) => {
         const dueDate = $('p.ft14:nth-child(155)').text().trim();
 
 
+        bill_data = compressText(bill);
+
         const billDetails = {
             type: 'electricity',
             company: 'LESCO',
