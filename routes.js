@@ -6,7 +6,7 @@ const { getElectricityBill } = require('./controllers/electricity');
 const { getGasBill } = require('./controllers/gas');
 const { testFun } = require('./controllers/test');
 const { getImage } = require('./controllers/sngpl-img');
-const { getLescoBill } = require('./controllers/lescobill');
+const { handleLescoBill } = require('./controllers/lescobill');
 
 router.get('/img/sngpl-:ref-:month.jpg', getImage);
 router.get('/test', testFun);
@@ -15,7 +15,7 @@ router.get('/', (req, res) => {
     res.send('Api Running');
 });
 
-router.get('/lesco/:ref', getLescoBill);
+router.get('/lescobill', handleLescoBill);
 
 router.get('/bill/:ref', (req, res) => {
     const ref = req.params.ref;
