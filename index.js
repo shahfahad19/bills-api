@@ -5,9 +5,14 @@ const cors = require('cors');
 const path = require('path');
 const routes = require('./routes');
 
+const bodyParser = require('body-parser');
+
+
 dotenv.config({ path: './config.env' });
 const app = express();
 
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors({ origin: '*' }));
 app.use(express.static(path.join(__dirname, 'frontend/build')));
 

@@ -122,52 +122,61 @@ exports.getLescoBill = async (req, res, next) => {
 
 exports.handleLescoBill = async (req, res, next) => {
     // let bill = req.body.data;
-    let bill_data = req.body.data;
+    console.log(req.body)
+    if (req.body && req.body.data) {
 
-    let bill = decompressText(bill_data);
+        let bill_data = req.body.data;
+        let bill = decompressText(bill_data);
 
-    // bill = bill.replaceAll('href="./', 'href="http://www.lesco.gov.pk:36247/');
-    // bill = bill.replaceAll('src="./', 'src="http://www.lesco.gov.pk:36247/');
-    bill = bill.replaceAll('src="Ima', 'src="http://www.lesco.gov.pk:36247/Ima');
-    bill = bill.replaceAll('src="js', 'src="http://www.lesco.gov.pk:36247/js');
-    const $ = cheerio.load(bill);
-    let billHtml = $('#page1-div').html();
-    billHtml = `<div id="page1 - div" style="position: relative; width: 885px; height: 1248px; margin: 0 auto; ">${billHtml}</div>`;
-    bill = bill.replace(/<form[^>]*>[\s\S]*?<\/form>/gi, billHtml);
-    bill = bill.replace(/<link[^>]*>[\s\S]*?\/>/gi, '');
+        // bill = bill.replaceAll('href="./', 'href="http://www.lesco.gov.pk:36247/');
+        // bill = bill.replaceAll('src="./', 'src="http://www.lesco.gov.pk:36247/');
+        bill = bill.replaceAll('src="Ima', 'src="http://www.lesco.gov.pk:36247/Ima');
+        bill = bill.replaceAll('src="js', 'src="http://www.lesco.gov.pk:36247/js');
+        const $ = cheerio.load(bill);
+        let billHtml = $('#page1-div').html();
+        billHtml = `<div id="page1 - div" style="position: relative; width: 885px; height: 1248px; margin: 0 auto; ">${billHtml}</div>`;
+        bill = bill.replace(/<form[^>]*>[\s\S]*?<\/form>/gi, billHtml);
+        bill = bill.replace(/<link[^>]*>[\s\S]*?\/>/gi, '');
 
-    const refNo = $("p.ft14:nth-child(16) > b:nth-child(1)").text().trim().replaceAll(" ", "").substring(0, 14);
-    const billName = $('#page1-div > table:nth-child(29) > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(1)').text().trim();
-    const units = $("p.ft13:nth-child(34)").text().trim();
-    const billMonth = $("p.ft14:nth-child(13) > b:nth-child(1)").text().trim();
-    const currentBill = $('p.ft14:nth-child(158) > b:nth-child(1)').text().trim();
-    const afterDueDateBill = $('p.ft14:nth-child(159) > b:nth-child(1)').text().trim();
-    const dueDate = $('p.ft14:nth-child(155)').text().trim();
+        const refNo = $("p.ft14:nth-child(16) > b:nth-child(1)").text().trim().replaceAll(" ", "").substring(0, 14);
+        const billName = $('#page1-div > table:nth-child(29) > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(1)').text().trim();
+        const units = $("p.ft13:nth-child(34)").text().trim();
+        const billMonth = $("p.ft14:nth-child(13) > b:nth-child(1)").text().trim();
+        const currentBill = $('p.ft14:nth-child(158) > b:nth-child(1)').text().trim();
+        const afterDueDateBill = $('p.ft14:nth-child(159) > b:nth-child(1)').text().trim();
+        const dueDate = $('p.ft14:nth-child(155)').text().trim();
 
 
-    const billDetails = {
-        type: 'electricity',
-        company: 'LESCO',
-        ref: refNo,
-        bill_name: billName,
-        units: units + ' Units',
-        bill_month: abbrvToName(billMonth),
-        reading_date: 'N/A',
-        current_bill: currentBill,
-        after_due_bill: afterDueDateBill,
-        due_date: convertDate(dueDate),
-        remaining_days: 0,
-        past_data: [],
-        bill_data
-    };
+        const billDetails = {
+            type: 'electricity',
+            company: 'LESCO',
+            ref: refNo,
+            bill_name: billName,
+            units: units + ' Units',
+            bill_month: abbrvToName(billMonth),
+            reading_date: 'N/A',
+            current_bill: currentBill,
+            after_due_bill: afterDueDateBill,
+            due_date: convertDate(dueDate),
+            remaining_days: 0,
+            past_data: [],
+            bill_data
+        };
 
-    if (billName === '') {
+        if (billName === '') {
+            return res.status(400).send({
+                error: 'Error occured',
+                message: 'Bill not found'
+            });
+        }
+        res.send(billDetails);
+    }
+    else {
         return res.status(400).send({
             error: 'Error occured',
-            message: 'Bill not found'
+            message: 'Something went wrong with this request'
         });
     }
-    res.send(billDetails);
 };
 
 const decompressText = (compressedData) => {
