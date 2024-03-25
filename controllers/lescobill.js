@@ -131,14 +131,16 @@ exports.handleLescoBill = async (req, res) => {
         let bill = decompressText(bill_data);
         let host = process.env.HOST;
 
-        // bill = bill.replaceAll('href="./', 'href="http://www.lesco.gov.pk:36247/');
         bill = bill.replaceAll('src="Images/BLANK_NEW BILL.png"', `src="${host}/file/lesco.png"`);
-        bill = bill.replace('js/dist/index.js', `${host}/file/lesco.js`)
         const $ = cheerio.load(bill);
         let billHtml = $('#page1-div').html();
         billHtml = `<div id="page1 - div" style="position: relative; width: 885px; height: 1248px; margin: 0 auto; ">${billHtml}</div>`;
         bill = bill.replace(/<form[^>]*>[\s\S]*?<\/form>/gi, billHtml);
         bill = bill.replace(/<link[^>]*>[\s\S]*?\/>/gi, '');
+        bill = bill.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '');
+        bill = bill.replace("</body>", `
+        <script src="${host}/file/lesco.js"></script>
+        </body>`);
 
         const refNo = $("p.ft14:nth-child(16) > b:nth-child(1)").text().trim().replaceAll(" ", "").substring(0, 14);
         const billName = $('#page1-div > table:nth-child(29) > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(1)').text().trim();

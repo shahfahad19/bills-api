@@ -153,6 +153,11 @@
 
 })));
 
+(function () {
+    var code = new Code128('L007[vZmqU50Um2Ak6p000003OM3O#')
+    code.insert(document.getElementById('BarCodeP1'))
+})();
+
 function hideImg1() {
     document.getElementById("mtr1img")
         .style.display = "none";
