@@ -122,8 +122,9 @@ exports.getLescoBill = async (req, res, next) => {
 
 exports.handleLescoBill = async (req, res, next) => {
     // let bill = req.body.data;
-    console.log(req.body)
-    if (1 == 1) {
+    const res_query = req.query.res;
+
+    if (req.body && req.body.data) {
 
 
         let bill_data = req.body.data;
@@ -149,32 +150,38 @@ exports.handleLescoBill = async (req, res, next) => {
         const dueDate = $('p.ft14:nth-child(155)').text().trim();
 
 
-
-        bill_data = compressText(bill);
-
-        const billDetails = {
-            type: 'electricity',
-            company: 'LESCO',
-            ref: refNo,
-            bill_name: billName,
-            units: units + ' Units',
-            bill_month: abbrvToName(billMonth),
-            reading_date: 'N/A',
-            current_bill: currentBill,
-            after_due_bill: afterDueDateBill,
-            due_date: convertDate(dueDate),
-            remaining_days: 0,
-            past_data: [],
-            bill_data
-        };
-
-        if (billName === '') {
-            return res.status(400).send({
-                error: 'Error occured',
-                message: 'Bill not found'
-            });
+        if (res_query === 'bill') {
+            res.send(bill);
         }
-        res.send(billDetails);
+        else {
+            bill_data = compressText(bill);
+
+            const billDetails = {
+                type: 'electricity',
+                company: 'LESCO',
+                ref: refNo,
+                bill_name: billName,
+                units: units + ' Units',
+                bill_month: abbrvToName(billMonth),
+                reading_date: 'N/A',
+                current_bill: currentBill,
+                after_due_bill: afterDueDateBill,
+                due_date: convertDate(dueDate),
+                remaining_days: 0,
+                past_data: [],
+                bill_data
+            };
+
+            if (billName === '') {
+                return res.status(400).send({
+                    error: 'Error occured',
+                    message: 'Bill not found'
+                });
+            }
+            res.send(billDetails);
+        }
+
+
     }
     else {
         return res.status(400).send({
