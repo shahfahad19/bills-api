@@ -23,7 +23,12 @@ app.use('/api', routes);
 
 
 app.get('/file/:fileName', (req, res) => {
-    const imagePath = path.join(__dirname, 'files', req.params.fileName);
+    let fileName = req.params.fileName;
+    let cacheDurationInSeconds = 6 * 30 * 24 * 60 * 60;
+    const expirationDate = new Date(Date.now() + cacheDurationInSeconds * 1000).toUTCString();
+    res.setHeader('Cache-Control', `public, max-age=${cacheDurationInSeconds}`);
+    res.setHeader('Expires', expirationDate);
+    const imagePath = path.join(__dirname, 'files', fileName);
     res.sendFile(imagePath);
 });
 
