@@ -138,6 +138,7 @@ exports.handleLescoBill = async (req, res) => {
         bill = bill.replace(/<form[^>]*>[\s\S]*?<\/form>/gi, billHtml);
         bill = bill.replace(/<link[^>]*>[\s\S]*?\/>/gi, '');
         bill = bill.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '');
+        bill = bill.replace(`<meta content="width=device-width, initial-scale=1" name="viewport" />`, '');
         bill = bill.replace("</body>", `
         <script src="${host}/file/lesco.js"></script>
     </body>`);
