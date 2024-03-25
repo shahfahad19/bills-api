@@ -144,7 +144,9 @@ exports.handleLescoBill = async (req, res) => {
     </body>`);
         bill = bill.replace(`<body bgcolor="#FFFFFF" vlink="blue" link="blue" style="width: 880px;">`, `<body>`);
         bill = bill.replace(`<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />`, `<meta charset="utf-16" />`);
-        bill = bill.replace(`<div id="page1 - div" style="position: relative; width: 885px; height: 1248px; ">`, `<div style="position: relative; margin: 0 auto; ">`);
+        bill = bill.replace(`<meta content="width=device-width, initial-scale=1" name="viewport" />`, `<meta name="viewport" content="width=device-width, initial-scale=1">`);
+        bill = bill.replace(`<div id="page1 - div" style="position: relative; width: 885px; height: 1248px; ">`, `<div style="position: relative; width: 885px; margin: 0 auto; ">`);
+        bill = bill.replace(` width="885" height="1248"`, ``);
 
         const refNo = $("p.ft14:nth-child(16) > b:nth-child(1)").text().trim().replaceAll(" ", "").substring(0, 14);
         const billName = $('#page1-div > table:nth-child(29) > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(1)').text().trim();
