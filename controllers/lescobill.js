@@ -140,7 +140,7 @@ exports.handleLescoBill = async (req, res) => {
         bill = bill.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '');
         bill = bill.replace("</body>", `
         <script src="${host}/file/lesco.js"></script>
-        </body>`);
+    </body>`);
 
         const refNo = $("p.ft14:nth-child(16) > b:nth-child(1)").text().trim().replaceAll(" ", "").substring(0, 14);
         const billName = $('#page1-div > table:nth-child(29) > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(1)').text().trim();
