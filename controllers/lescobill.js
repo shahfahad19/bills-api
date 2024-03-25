@@ -134,7 +134,7 @@ exports.handleLescoBill = async (req, res) => {
         bill = bill.replaceAll('src="Images/BLANK_NEW BILL.png"', `src="${host}/file/lesco.png"`);
         const $ = cheerio.load(bill);
         let billHtml = $('#page1-div').html();
-        billHtml = `<div id="page1 - div" style="position: relative; width: 885px; height: 1248px; margin: 0 auto; ">${billHtml}</div>`;
+        billHtml = `<div id="page1 - div" style="position: relative; width: 885px; height: 1248px; ">${billHtml}</div>`;
         bill = bill.replace(/<form[^>]*>[\s\S]*?<\/form>/gi, billHtml);
         bill = bill.replace(/<link[^>]*>[\s\S]*?\/>/gi, '');
         bill = bill.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '');
