@@ -2,6 +2,7 @@
 const express = require('express');
 const router = express.Router();
 
+
 const { getElectricityBill } = require('./controllers/electricity');
 const { getGasBill } = require('./controllers/gas');
 const { testFun } = require('./controllers/test');
@@ -15,6 +16,10 @@ router.get('/', (req, res) => {
     res.send('Api Running');
 });
 
+
+
+
+router.get('/lescobill', handleLescoBill);
 router.post('/lescobill', handleLescoBill);
 
 router.get('/bill/:ref', (req, res) => {

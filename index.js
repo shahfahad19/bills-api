@@ -18,10 +18,18 @@ app.use(express.static(path.join(__dirname, 'frontend/build')));
 
 const PORT = process.env.PORT || 6000;
 
+
 app.use('/api', routes);
 
+
+app.get('/file/:fileName', (req, res) => {
+    const imagePath = path.join(__dirname, 'files', req.params.fileName);
+    res.sendFile(imagePath);
+});
+
+
 app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'frontend/build', 'index.html'));
+    res.send('Route not found')
 });
 
 app.listen(PORT, () => {
