@@ -145,7 +145,154 @@ exports.handleLescoBill = async (req, res) => {
         bill = bill.replace(`<body bgcolor="#FFFFFF" vlink="blue" link="blue" style="width: 880px;">`, `<body>`);
         bill = bill.replace(`<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />`, `<meta charset="utf-16" />`);
         bill = bill.replace(`<meta content="width=device-width, initial-scale=1" name="viewport" />`, `<meta name="viewport" content="width=device-width, initial-scale=1">`);
+        bill = bill.replace(/<style[\S\s]*style>/, `<style>
+         .print:last-child
+        {
+            page-break-after: auto;
+        }
+
+        @page
+        {
+            size: A4;
+            margin-top: 0;
+            margin-bottom: 0;
+        }
+
+        header,
+        footer
+            {
+                display: none;
+            }
+
+            html, body
+            {
+                height: 100%;
+                margin: 0 !important;
+                padding: 0 !important;
+                overflow: hidden;
+            }
+
+            #printPageButton
+            {
+                display: none;
+            }
+
+
+        p
+        {
+            margin: 0;
+            padding: 0;
+        }
+
+        .ft10
+        {
+            font-size: 12px;
+            font-family: Calibri;
+            color: #000000;
+        }
+
+        .ft11
+        {
+            font-size: 12px;
+            font-family: Calibri;
+            color: #000000;
+        }
+
+        .ft12
+        {
+            font-size: 12px;
+            font-family: Calibri;
+            color: #000000;
+        }
+
+        .ft13
+        {
+            font-size: 12px;
+            font-family: Calibri;
+            color: #000000;
+        }
+
+        .ft14
+        {
+            font-size: 15px;
+            font-family: Calibri;
+            color: #000000;
+        }
+
+        .ft114
+        {
+            font-size: 19px;
+            font-family: Calibri;
+            color: #000000;
+        }
+
+        .ft15
+        {
+            font-size: 12px;
+            font-family: Calibri;
+            color: #000000;
+        }
+
+        .ft16
+        {
+            font-size: 11px;
+            font-family: Calibri;
+            color: #000000;
+        }
+
+        .ft17
+        {
+            font-size: 14px;
+            font-family: Calibri;
+            color: #b12121;
+        }
+
+        .ft18
+        {
+            font-size: 8px;
+            font-family: Calibri;
+            color: #000000;
+        }
+
+        .ft19
+        {
+            font-size: 9px;
+            font-family: Helvetica;
+            color: #000000;
+        }
+
+        .ft110
+        {
+            font-size: 9px;
+            font-family: Helvetica;
+            color: #000000;
+        }
+
+        .ft210
+        {
+            font-size: 11px;
+            font-family: Helvetica;
+            color: #000000;
+        }
+
+        .ft111
+        {
+            font-size: 9px;
+            line-height: 14px;
+            font-family: Calibri;
+            color: #000000;
+        }
+
+        .ft112
+        {
+            font-size: 9px;
+            line-height: 12px;
+            font-family: Helvetica;
+            color: #000000;
+        }
+        </style>`);
         // bill = bill.replace(`<div id="page1 - div" style="position: relative; width: 885px; height: 1248px; ">`, `<div style="position: relative; width: 885px; margin: 0 auto; ">`);
+
 
         const refNo = $("p.ft14:nth-child(16) > b:nth-child(1)").text().trim().replaceAll(" ", "").substring(0, 14);
         const billName = $('#page1-div > table:nth-child(29) > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(1)').text().trim();
