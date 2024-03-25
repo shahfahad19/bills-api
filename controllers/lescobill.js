@@ -169,7 +169,6 @@ exports.handleLescoBill = async (req, res) => {
                 height: 100%;
                 margin: 0 !important;
                 padding: 0 !important;
-                overflow: hidden;
             }
 
             #printPageButton
