@@ -1,7 +1,6 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
 const zlib = require('zlib');
-const puppeteer = require('puppeteer');
 
 exports.getLescoBill = async (req, res, next) => {
     if (!req.query.admin) {

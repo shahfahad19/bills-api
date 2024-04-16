@@ -5,12 +5,11 @@ const router = express.Router();
 
 const { getElectricityBill } = require('./controllers/electricity');
 const { getGasBill } = require('./controllers/gas');
-const { testFun } = require('./controllers/test');
 const { getImage } = require('./controllers/sngpl-img');
 const { handleLescoBill } = require('./controllers/lescobill');
+const { handleSNGPLBill } = require('./controllers/gas');
 
 router.get('/img/sngpl-:ref-:month.jpg', getImage);
-router.get('/test', testFun);
 
 router.get('/', (req, res) => {
     res.send('Api Running');
@@ -30,6 +29,8 @@ router.get('/lescobill', (req, res) => {
 });
 
 router.post('/lescobill', handleLescoBill);
+
+router.post('/sngplbill', handleSNGPLBill);
 
 router.get('/bill/:ref', (req, res) => {
     const ref = req.params.ref;

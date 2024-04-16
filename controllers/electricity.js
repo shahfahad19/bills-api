@@ -1,7 +1,6 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
 const zlib = require('zlib');
-const puppeteer = require('puppeteer');
 
 exports.getElectricityBill = async (req, res, next) => {
     const refno = req.params.ref;
