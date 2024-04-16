@@ -228,6 +228,8 @@ exports.handleSNGPLBill = async (req, res) => {
 
             });
 
+            const refno = $("tr.bdr-bt:nth-child(1) > td:nth-child(2)").text().trim();
+
             const currentBill = $(
                 'body > div > div > table > tbody > tr:nth-child(8) > td > table > tbody > tr > td:nth-child(2) > table > tbody > tr.txt-bld > td:nth-child(1)'
             )
