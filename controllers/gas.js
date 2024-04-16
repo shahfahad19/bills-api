@@ -210,7 +210,7 @@ exports.handleSNGPLBill = async (req, res) => {
             updatedResponse = updatedResponse.replace(`<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">`, `<!DOCTYPE html>`);
             updatedResponse = updatedResponse.replaceAll(`'class`, `' class`);
 
-            const $ = cheerio.load(response.data);
+            const $ = cheerio.load(updatedResponse);
 
             const rows = $('.sheet > div:nth-child(2) > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(4) > td:nth-child(2) > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(3) > td:nth-child(1) > table:nth-child(1) > tbody:nth-child(1)').find('tr');
 
