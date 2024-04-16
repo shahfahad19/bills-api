@@ -44,10 +44,10 @@ router.get('/bill/:ref', (req, res) => {
 
 router.get('/version', (req, res) => {
     res.json({
-        versionCode: 3,
-        versionName: '1.2',
+        versionCode: 4,
+        versionName: '1.3.1',
         message: 'A new update is available!',
-        appLink: 'https://www.upload-apk.com/vjcW9hqIfwJwuH9',
+        appLink: 'https://mybillsapp.vercel.app',
         skipable: false
     });
 });
