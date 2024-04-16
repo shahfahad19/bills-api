@@ -130,7 +130,7 @@ exports.handleLescoBill = async (req, res) => {
         let bill = decompressText(bill_data);
         let host = process.env.HOST;
 
-        bill = bill.replaceAll('src="Images/BLANK_NEW BILL.png"', `src="${host}/file/lesco.png"`);
+        bill = bill.replaceAll('src="Images/GB_600.png"', `src="${host}/file/lesco2.png"`);
         const $ = cheerio.load(bill);
         let billHtml = $('#page1-div').html();
         billHtml = `<div id="page1 - div" style="position: relative; width: 885px; height: 1248px; ">${billHtml}</div>`;
@@ -150,9 +150,9 @@ exports.handleLescoBill = async (req, res) => {
         const billName = $('#page1-div > table:nth-child(29) > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(1)').text().trim();
         const units = $("p.ft13:nth-child(34)").text().trim();
         const billMonth = $("p.ft14:nth-child(13) > b:nth-child(1)").text().trim();
-        const currentBill = $('p.ft14:nth-child(158) > b:nth-child(1)').text().trim();
+        const currentBill = $('p.ft14:nth-child(33) > b:nth-child(1)').text().trim();
         const afterDueDateBill = $('p.ft14:nth-child(159) > b:nth-child(1)').text().trim();
-        const dueDate = $('p.ft14:nth-child(155)').text().trim();
+        const dueDate = $('p.ft14:nth-child(30) > b:nth-child(1)').text().trim();
 
 
         if (res_query === 'bill') {
