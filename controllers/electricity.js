@@ -25,7 +25,7 @@ exports.getElectricityBill = async (req, res, next) => {
 
         const selectors = {
             billMonth: 'body > div > div.headertable.fontsize > div:nth-child(4) > table > tbody > tr:nth-child(2) > td:nth-child(1)',
-            currentBill: 'body > div > div.headertable.fontsize > div:nth-child(4) > table > tbody > tr:nth-child(1) > td.border-b.border-t.border-r.content',
+            currentBill: 'body > div.maincontent.fontsize > div.headertable.fontsize > div:nth-child(3) > table > tbody > tr:nth-child(1) > td.border-b.border-t.border-r.content',
             afterDueDateBill: 'body > div > div.headertable.fontsize > div:nth-child(4) > table > tbody > tr:nth-child(2) > td.font-size.border-rb.border-r.content',
             dueDate: 'body > div > div.headertable.fontsize > div:nth-child(4) > table > tbody > tr:nth-child(2) > td:nth-child(2)',
             billName: 'body > div > table:nth-child(5) > tbody > tr > td.border-r > table > tbody > tr:nth-child(2) > td:nth-child(1) > p > span:nth-child(3)',
