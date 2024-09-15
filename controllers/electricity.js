@@ -116,7 +116,7 @@ exports.getElectricityBill = async (req, res, next) => {
                 ref: refno,
                 bill_name: billName,
                 units: units + ' Units',
-                bill_month: "["+billMonth+"]",
+                bill_month: billMonth,
                 reading_date: convertDate(readingDate),
                 current_bill: currentBill,
                 after_due_bill: afterDueDateBill,
