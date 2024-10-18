@@ -114,7 +114,7 @@ exports.getElectricityBill = async (req, res, next) => {
                 type: 'electricity',
                 company,
                 ref: refno,
-                bill_name: billName,
+                bill_name: "Click View Full Bill",
                 units: units + ' Units',
                 bill_month: billMonth,
                 reading_date: convertDate(readingDate),
