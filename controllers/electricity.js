@@ -24,13 +24,13 @@ exports.getElectricityBill = async (req, res, next) => {
         homeurl = 'https://' + homeurl[0];
 
         const selectors = {
-            billMonth: 'body > div.maincontent.fontsize > table:nth-child(2) > tbody > tr.content > td:nth-child(4)',
-            currentBill: 'body > div.maincontent.fontsize > div.headertable.fontsize > div:nth-child(3) > table > tbody > tr:nth-child(1) > td.border-b.border-t.border-r.content',
-            afterDueDateBill: 'body > div.maincontent.fontsize > div.headertable.fontsize > div:nth-child(3) > table > tbody > tr:nth-child(2) > td.font-size.border-rb.border-r.content',
-            dueDate: 'body > div.maincontent.fontsize > div.headertable.fontsize > div:nth-child(3) > table > tbody > tr:nth-child(2) > td:nth-child(2)',
-            billName: 'body > div > table:nth-child(5) > tbody > tr > td.border-r > table > tbody > tr:nth-child(2) > td:nth-child(1) > p > span:nth-child(3)',
-            units: 'body > div > table:nth-child(5) > tbody > tr > td.border-r > table > tbody > tr.content > td:nth-child(5)',
-            readingDate: 'body > div > table:nth-child(2) > tbody > tr.content > td:nth-child(5)',
+            billMonth: 'body > div.tab-content.active > div.maincontent.fontsize > table:nth-child(2) > tbody > tr.content > td:nth-child(4)',
+            currentBill: 'body > div.tab-content.active > div.maincontent.fontsize > div.headertable.fontsize > div:nth-child(3) > table > tbody > tr:nth-child(1) > td.border-b.border-t.border-r.content',
+            afterDueDateBill: 'body > div.tab-content.active > div.maincontent.fontsize > div.headertable.fontsize > div:nth-child(3) > table > tbody > tr:nth-child(2) > td.font-size.border-rb.border-r.content',
+            dueDate: 'body > div.tab-content.active > div.maincontent.fontsize > div.headertable.fontsize > div:nth-child(3) > table > tbody > tr:nth-child(2) > td:nth-child(2)',
+            billName: 'body > div.tab-content.active > div > table:nth-child(5) > tbody > tr > td.border-r > table > tbody > tr:nth-child(2) > td:nth-child(1) > p > span:nth-child(3)',
+            units: 'body > div.tab-content.active > div > table:nth-child(5) > tbody > tr > td.border-r > table > tbody > tr.content > td:nth-child(5)',
+            readingDate: 'body > div.tab-content.active > div > table:nth-child(2) > tbody > tr.content > td:nth-child(5)',
         };
 
 
@@ -114,7 +114,7 @@ exports.getElectricityBill = async (req, res, next) => {
                 type: 'electricity',
                 company,
                 ref: refno,
-                bill_name: "Click View Full Bill",
+                bill_name: billName,
                 units: units + ' Units',
                 bill_month: billMonth,
                 reading_date: convertDate(readingDate),
