@@ -40,6 +40,7 @@ exports.getElectricityBill = async (req, res, next) => {
         updatedResponse = updatedResponse.replace(/href="\//g, `href="${homeurl}/`);
         updatedResponse = updatedResponse.replace(/action="\.\//g, `action="${homeurl}/pescobill/`);
         updatedResponse = updatedResponse.replace(/<script t.*script>/g, ``);
+        updatedResponse = updatedResponse.replaceAll('padding: 20px;', ``);
         updatedResponse = updatedResponse.replace('http://snap', 'https://snap');
         updatedResponse = updatedResponse.replace('<meta charset="utf-16" />', `<meta charset="utf-16" />
         <meta name="viewport" content="width=device-width, initial-scale=1">`);
@@ -66,6 +67,10 @@ exports.getElectricityBill = async (req, res, next) => {
 
         billMonth = monthFullName;
 
+
+        $('.tabs.noprint').remove();
+        $('.tabcontent:nth-child(2)').remove();
+        updatedResponse = $.html();
 
         if (res_query === 'bill') {
             return res.status(200).send(updatedResponse);
