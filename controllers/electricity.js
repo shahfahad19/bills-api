@@ -26,8 +26,10 @@ exports.getElectricityBill = async (req, res, next) => {
         const selectors = {
             billMonth: 'body > div.tab-content.active > div.maincontent.fontsize > table:nth-child(2) > tbody > tr.content > td:nth-child(4)',
             currentBill: 'body > div.tab-content.active > div.maincontent.fontsize > div.headertable.fontsize > div:nth-child(3) > table > tbody > tr:nth-child(1) > td.border-b.border-t.border-r.content',
-            afterDueDateBill: 'body > div.tab-content.active > div.maincontent.fontsize > div.headertable.fontsize > div:nth-child(3) > table > tbody > tr:nth-child(2) > td.font-size.border-rb.border-r.content',
+            // afterDueDateBill: 'body > div.tab-content.active > div.maincontent.fontsize > div.headertable.fontsize > div:nth-child(3) > table > tbody > tr:nth-child(2) > td.font-size.border-rb.border-r.content',
             dueDate: 'body > div.tab-content.active > div.maincontent.fontsize > div.headertable.fontsize > div:nth-child(3) > table > tbody > tr:nth-child(2) > td:nth-child(2)',
+            dueDate2: 'td.font-size:nth-child(5) > div:nth-child(1) > div:nth-child(1)',
+            dueDate3: 'td.font-size:nth-child(5) > div:nth-child(1) > div:nth-child(3)',
             billName: 'body > div.tab-content.active > div > table:nth-child(5) > tbody > tr > td.border-r > table > tbody > tr:nth-child(2) > td:nth-child(1) > p > span:nth-child(3)',
             units: 'body > div.tab-content.active > div > table:nth-child(5) > tbody > tr > td.border-r > table > tbody > tr.content > td:nth-child(5)',
             readingDate: 'body > div.tab-content.active > div > table:nth-child(2) > tbody > tr.content > td:nth-child(5)',
@@ -68,13 +70,33 @@ exports.getElectricityBill = async (req, res, next) => {
         billMonth = monthFullName;
 
         const currentBill = $(selectors.currentBill).text().trim();
-        const afterDueDateBill = $(selectors.afterDueDateBill).text().trim().replaceAll('  ', "").replaceAll('\n', '').replaceAll('-24', '-24 ').replaceAll('After', ", After");
+        // const afterDueDateBill = $(selectors.afterDueDateBill).text().trim().replaceAll('  ', "").replaceAll('\n', '').replaceAll('-24', '-24 ').replaceAll('After', ", After");
         const dueDate = $(selectors.dueDate).text().trim();
+        let dueDate2 = $(selectors.dueDate2).text().trim();
+        let dueDate3 = $(selectors.dueDate3).text().trim();
         const billName = $(selectors.billName).text().trim();
         const units = $(selectors.units).text().trim();
         const readingDate = $(selectors.readingDate).text().trim();
-        const daysRemaining = Math.ceil((new Date(dueDate + " UTC").getTime() - new Date().getTime()) / (1000 * 3600 * 24));
 
+
+
+        dueDate2 = dueDate2.split(' ');
+        dueDate3 = dueDate3.split(' ');
+        let afterDueBill = dueDate2[dueDate2.length-1];
+        let afterDueBill2 = dueDate3[dueDate3.length-1];
+        dueDate2 = dueDate2[1].trim();
+        dueDate3 = dueDate3[1].trim();
+
+        const daysRemaining = Math.ceil((new Date(dueDate + " UTC").getTime() - new Date().getTime()) / (1000 * 3600 * 24));
+        const daysRemaining2 = Math.ceil((new Date(dueDate2 + " UTC").getTime() - new Date().getTime()) / (1000 * 3600 * 24));
+
+        let payable = afterDueBill2; 
+        if (daysRemaining2 > -1) {
+            payable = afterDueBill;
+        }
+        if (daysRemaining > -1) {
+            payable = currentBill;
+        }
 
         if (!billName) {
             throw new Error("Bill not found");
@@ -127,10 +149,14 @@ exports.getElectricityBill = async (req, res, next) => {
                 units: units + ' Units',
                 bill_month: billMonth,
                 reading_date: convertDate(readingDate),
+                payable,
                 current_bill: currentBill,
-                after_due_bill: afterDueDateBill,
+                after_due_bill: afterDueBill,
+                after_due_bill2: afterDueBill2,
                 due_date: convertDate(dueDate),
+                due_date2: convertDate(dueDate2),
                 remaining_days: daysRemaining,
+                remaining_days2: daysRemaining2,
                 past_data: pastData,
                 bill_data: compressText(updatedResponse.replace(/\s+/g, ' '))
             };
