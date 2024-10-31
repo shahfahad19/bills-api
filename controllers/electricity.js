@@ -67,6 +67,19 @@ exports.getElectricityBill = async (req, res, next) => {
 
         billMonth = monthFullName;
 
+        const currentBill = $(selectors.currentBill).text().trim();
+        const afterDueDateBill = $(selectors.afterDueDateBill).text().trim().replaceAll('  ', "").replaceAll('\n', '').replaceAll('-24', '-24 ').replaceAll('After', ", After");
+        const dueDate = $(selectors.dueDate).text().trim();
+        const billName = $(selectors.billName).text().trim();
+        const units = $(selectors.units).text().trim();
+        const readingDate = $(selectors.readingDate).text().trim();
+        const daysRemaining = Math.ceil((new Date(dueDate + " UTC").getTime() - new Date().getTime()) / (1000 * 3600 * 24));
+
+
+        if (!billName) {
+            throw new Error("Bill not found");
+        }
+
 
         $('.tabs.noprint').remove();
         $('.tabcontent:nth-child(2)').remove();
@@ -106,15 +119,6 @@ exports.getElectricityBill = async (req, res, next) => {
 
         }
         else {
-            const currentBill = $(selectors.currentBill).text().trim();
-            const afterDueDateBill = $(selectors.afterDueDateBill).text().trim();
-            const dueDate = $(selectors.dueDate).text().trim();
-            const billName = $(selectors.billName).text().trim();
-            const units = $(selectors.units).text().trim();
-            const readingDate = $(selectors.readingDate).text().trim();
-
-            const daysRemaining = Math.ceil((new Date(dueDate + " UTC").getTime() - new Date().getTime()) / (1000 * 3600 * 24));
-
             const billDetails = {
                 type: 'electricity',
                 company,
