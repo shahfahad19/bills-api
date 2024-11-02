@@ -167,7 +167,7 @@ exports.getGasBill = async (req, res) => {
                 due_date: convertDate(dueDate),
                 remaining_days: daysDifference,
                 past_data: pastData,
-                bill_data: compressText(updatedResponse.replace(/\s+/g, ' '))
+                bill_data: compressText(updatedResponse.replace(/\s+/g, ' ')),
             };
 
 
