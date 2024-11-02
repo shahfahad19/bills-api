@@ -46,7 +46,7 @@ router.get('/version', (req, res) => {
     res.json({
         versionCode: 5,
         versionName: '1.3.2',
-        message: 'A new update is available!\nBefore installing the new app, copy/screenshot your existing bills and uninstall this app',
+        message: 'A new update is available!\n\n⚠NOTE: Before installing the new app, copy/screenshot your existing bills and uninstall this app',
         appLink: 'https://mybillsapp.vercel.app',
         skipable: false
     });
