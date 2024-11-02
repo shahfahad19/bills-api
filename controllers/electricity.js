@@ -158,7 +158,8 @@ exports.getElectricityBill = async (req, res, next) => {
                 remaining_days: daysRemaining,
                 remaining_days2: daysRemaining2,
                 past_data: pastData,
-                bill_data: compressText(updatedResponse.replace(/\s+/g, ' '))
+                bill_data: compressText(updatedResponse.replace(/\s+/g, ' ')),
+                loaded: true
             };
             res.status(200).json(billDetails);
         }
