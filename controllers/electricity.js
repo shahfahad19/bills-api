@@ -150,7 +150,7 @@ exports.getElectricityBill = async (req, res, next) => {
                 bill_month: billMonth,
                 reading_date: convertDate(readingDate),
                 payable,
-                current_bill: currentBill+1,
+                current_bill: currentBill,
                 after_due_bill: afterDueBill,
                 after_due_bill2: afterDueBill2,
                 due_date: convertDate(dueDate),
