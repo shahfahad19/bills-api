@@ -306,6 +306,7 @@ exports.handleSNGPLBill = async (req, res) => {
                     reading_date: convertDate(readingDate),
                     current_bill: currentBill.replaceAll(',', ''),
                     after_due_bill: afterDueDateBill.replaceAll(',', ''),
+                    paid: false,
                     due_date: convertDate(dueDate),
                     remaining_days: daysDifference,
                     past_data: pastData,
