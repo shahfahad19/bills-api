@@ -2,7 +2,6 @@
 const express = require('express');
 const router = express.Router();
 
-
 const { getElectricityBill } = require('./controllers/electricity');
 const { getGasBill } = require('./controllers/gas');
 const { testFun } = require('./controllers/test');

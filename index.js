@@ -14,7 +14,10 @@ const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors({ origin: '*' }));
-app.use(express.static(path.join(__dirname, 'frontend/build')));
+// app.use(express.static(path.join(__dirname, 'frontend/build')));
+app.get('/', (req, res) => {
+    res.send('Api Running');
+});
 
 const PORT = process.env.PORT || 6000;
 
