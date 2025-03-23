@@ -165,6 +165,7 @@ exports.getElectricityBill = async (req, res, next) => {
 
     } catch (error) {
         return res.status(500).send({
+            api: 'electricityv1',
             error: 'Error occured',
             message: error.message,
             err: error,
