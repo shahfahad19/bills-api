@@ -216,6 +216,7 @@ exports.getElectricityBill = async (req, res, next) => {
         return res.status(500).send({
             error: 'Error occurred',
             message: error.message,
+            stack: error.stack,
             err: error,
         });
     }
