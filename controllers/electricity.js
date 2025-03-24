@@ -27,7 +27,7 @@ exports.getElectricityBill = async (req, res, next) => {
           }
         });
       
-          const getResponse = await axiosInstance.get('https://bill.pitc.com.pk/pescobill');
+          const getResponse = await axiosInstance.get(url);
           
           const $init = cheerio.load(getResponse.data);
       
@@ -55,12 +55,12 @@ exports.getElectricityBill = async (req, res, next) => {
           });
       
           const postResponse = await axiosInstance.post(
-            'https://bill.pitc.com.pk/pescobill',
+            url,
             formData.toString(),
             {
               headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
-                'Referer': 'https://bill.pitc.com.pk/pescobill',
+                'Referer': url,
                 'Cookie': `${cookieToken}; ${sessionCookie}`
               }
             }
