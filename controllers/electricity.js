@@ -306,7 +306,6 @@ const getCompany = ref => {
             return [
                 'QESCO',
                 "https://bill.pitc.com.pk/qescobill"
-            ]
-        } 
+            ] 
     }
 }
