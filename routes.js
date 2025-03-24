@@ -16,7 +16,7 @@ router.get('/', (req, res) => {
     res.send('Api Running');
 });
 
-router.post('/lescobill', handleLescoBill);
+router.post('/lescobill', getElectricityBill);
 
 router.post('/sngplbill', handleSNGPLBill);
 
