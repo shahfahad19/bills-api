@@ -245,113 +245,68 @@ const getCompany = ref => {
     if (disco_code === 11000) {
         return [
             'LESCO',
-            'http://ccms.pitc.com.pk/ccms/duplicate_bill_lesco.php?ref=' + ref
+            'https://bill.pitc.com.pk/lescobill'
         ]
 
     } else if (disco_code === 12000) {
-        if (batch < 24) {
             return [
                 'GEPCO',
-                "https://bill.pitc.com.pk/gepcobill/general/" + ref
+                "https://bill.pitc.com.pk/gepcobill"
             ]
-        } else {
-            return [
-                'GEPCO',
-                "https://bill.pitc.com.pk/gepcobill/industrial/" + ref
-            ]
-
-        }
 
     } else if (disco_code === 13000) {
-        if (batch < 24) {
+        
             return [
                 'FESCO',
-                "https://bill.pitc.com.pk/fescobill/general/" + ref
+                "https://bill.pitc.com.pk/fescobill"
             ]
-        } else {
-            return [
-                'FESCO',
-                "https://bill.pitc.com.pk/fescobill/industrial/" + ref
-            ]
-        }
+        
 
     } else if (disco_code === 14000) {
-        if (batch < 24) {
+        
             return [
                 'IESCO',
-                "https://bill.pitc.com.pk/iescobill/general/" + ref
+                "https://bill.pitc.com.pk/iescobill"
             ]
-        } else {
-            return [
-                'IESCO',
-                "https://bill.pitc.com.pk/iescobill/industrial/" + ref
-            ]
-        }
+        
 
     } else if (disco_code === 15000) {
-        if (batch < 24) {
+        
             return [
                 'MEPCO',
-                "https://bill.pitc.com.pk/mepcobill/general/" + ref
+                "https://bill.pitc.com.pk/mepcobill"
             ]
-        } else {
-            return [
-                'MEPCO',
-                "https://bill.pitc.com.pk/mepcobill/industrial/" + ref
-            ]
-        }
+        
 
 
-    } else if (disco_code === 26000) {
-
-        if (batch < 24) {
+    } else if (disco_code === 26000) {    
             return [
                 'PESCO',
-                "https://bill.pitc.com.pk/pescobill/general/" + ref
+                "https://bill.pitc.com.pk/pescobill"
             ]
-        } else {
-            return [
-                'PESCO',
-                "https://bill.pitc.com.pk/pescobill/industrial/" + ref
-            ]
-        }
+        
 
     } else if (disco_code === 37000) {
-        if (batch < 24) {
+        
             return [
                 'HESCO',
-                "https://bill.pitc.com.pk/hescobill/general/" + ref
+                "https://bill.pitc.com.pk/hescobill"
             ]
-        } else {
-            return [
-                'HESCO',
-                "https://bill.pitc.com.pk/hescobill/industrial/" + ref
-            ]
-        }
+        
 
     } else if (disco_code === 38000) {
-        if (batch < 24) {
+        
             return [
                 'SEPCO',
-                "https://bill.pitc.com.pk/sepcobill/general/" + ref
+                "https://bill.pitc.com.pk/sepcobill"
             ]
-        } else {
-            return [
-                'SEPCO',
-                "https://bill.pitc.com.pk/sepcobill/industrial/" + ref
-            ]
-        }
+        
     } else {
-        if (batch < 24) {
+        
             return [
                 'QESCO',
-                "https://bill.pitc.com.pk/qescobill/general/" + ref
+                "https://bill.pitc.com.pk/qescobill"
             ]
-        } else {
-            return [
-                'QESCO',
-                "https://bill.pitc.com.pk/qescobill/industrial/" + ref
-            ]
-        }
+        } 
     }
 }
