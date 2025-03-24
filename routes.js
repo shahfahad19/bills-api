@@ -22,14 +22,10 @@ router.post('/sngplbill', handleSNGPLBill);
 
 router.get('/bill/:ref', (req, res) => {
     const ref = req.params.ref;
-    if (ref.length === 14) {
-        const [company, url] = getCompany(ref);
-        if (company === 'LESCO') {
-            getLescoBill(req, res);
-        }
-        else {
-            getElectricityBill(req, res);
-        }
+    const [company, url] = getCompany(ref);
+    if (company && ref.length >= 14) {
+        
+        getElectricityBill(req, res);
     } else if (ref.length === 11) {
         getGasBill(req, res);
     }
