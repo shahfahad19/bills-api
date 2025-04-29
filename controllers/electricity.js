@@ -3,6 +3,11 @@ const cheerio = require('cheerio');
 const zlib = require('zlib');
 const tough = require('tough-cookie');
 const { response } = require('express');
+const { HttpProxyAgent } = require('http-proxy-agent');
+
+// Real Pakistani proxy (as of now — may expire)
+const proxyUrl = 'http://119.156.195.173:3128';
+const agent = new HttpProxyAgent(proxyUrl);
 
 exports.getElectricityBill = async (req, res, next) => {
     const refno = req.params.ref;
@@ -16,6 +21,7 @@ exports.getElectricityBill = async (req, res, next) => {
         const axiosInstance = axios.create({
           jar: cookieJar,
           withCredentials: true,
+          httpAgent: agent,
           headers: {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
@@ -58,6 +64,7 @@ exports.getElectricityBill = async (req, res, next) => {
             url,
             formData.toString(),
             {
+                httpAgent: agent,
               headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
                 'Referer': url,
