@@ -399,7 +399,7 @@ exports.handleBill = async (req, res) => {
             const billDetails = {
                 type: 'electricity',
                 company: req.body.company,
-                ref: refno,
+                ref: req.body.refno,
                 bill_name: billName,
                 units: units + ' Units',
                 bill_month: billMonth,
