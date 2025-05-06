@@ -316,11 +316,7 @@ exports.handleBill = async (req, res) => {
       
         // Process response
         updatedResponse = updatedResponse.replace(/<div[^>]+class="noprint">.*?<\/div>/is, '');
-        let homeurl = req.body.url;
-        homeurl = url.replace('http://', '');
-        homeurl = url.replace('https://', '');
-        homeurl = homeurl.split('/');
-        homeurl = 'https://' + homeurl[0];
+        let homeurl = "https://bill.pitc.com.pk/";
 
         updatedResponse = updatedResponse.replace(/<noscript>.*?<\/noscript>/is, '');
         updatedResponse = updatedResponse.replace(/src="\//g, `src="${homeurl}/`);
