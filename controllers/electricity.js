@@ -313,24 +313,24 @@ exports.handleBill = async (req, res) => {
         let updatedResponse = decompressText(bill_data);
 
       
-        // // Process response
-        // updatedResponse = postResponse.data.replace(/<div[^>]+class="noprint">.*?<\/div>/is, '');
-        // let homeurl = url;
-        // homeurl = url.replace('http://', '');
-        // homeurl = url.replace('https://', '');
-        // homeurl = homeurl.split('/');
-        // homeurl = 'https://' + homeurl[0];
+        // Process response
+        updatedResponse = postResponse.data.replace(/<div[^>]+class="noprint">.*?<\/div>/is, '');
+        let homeurl = url;
+        homeurl = url.replace('http://', '');
+        homeurl = url.replace('https://', '');
+        homeurl = homeurl.split('/');
+        homeurl = 'https://' + homeurl[0];
 
-        // updatedResponse = updatedResponse.replace(/<noscript>.*?<\/noscript>/is, '');
-        // updatedResponse = updatedResponse.replace(/src="\//g, `src="${homeurl}/`);
-        // updatedResponse = updatedResponse.replace(/href="\//g, `href="${homeurl}/`);
-        // updatedResponse = updatedResponse.replace(/action="\.\//g, `action="${homeurl}/pescobill/`);
-        // updatedResponse = updatedResponse.replace(/<script t.*script>/g, ``);
-        // updatedResponse = updatedResponse.replaceAll('padding: 20px;', ``);
-        // updatedResponse = updatedResponse.replace('http://snap', 'https://snap');
-        // updatedResponse = updatedResponse.replace('<meta charset="utf-16" />', `<meta charset="utf-16" />
-        // <meta name="viewport" content="width=device-width, initial-scale=1">`);
-        // updatedResponse = updatedResponse.replace(`url('/images/`, ` url('https://bill.pitc.com.pk/images/`);
+        updatedResponse = updatedResponse.replace(/<noscript>.*?<\/noscript>/is, '');
+        updatedResponse = updatedResponse.replace(/src="\//g, `src="${homeurl}/`);
+        updatedResponse = updatedResponse.replace(/href="\//g, `href="${homeurl}/`);
+        updatedResponse = updatedResponse.replace(/action="\.\//g, `action="${homeurl}/pescobill/`);
+        updatedResponse = updatedResponse.replace(/<script t.*script>/g, ``);
+        updatedResponse = updatedResponse.replaceAll('padding: 20px;', ``);
+        updatedResponse = updatedResponse.replace('http://snap', 'https://snap');
+        updatedResponse = updatedResponse.replace('<meta charset="utf-16" />', `<meta charset="utf-16" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">`);
+        updatedResponse = updatedResponse.replace(`url('/images/`, ` url('https://bill.pitc.com.pk/images/`);
 
         const paid = updatedResponse.includes('Amount Paid');
 
