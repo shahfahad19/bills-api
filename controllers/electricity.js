@@ -396,40 +396,6 @@ exports.handleBill = async (req, res) => {
         $('.tabcontent:nth-child(2)').remove();
         updatedResponse = $.html();
 
-        if (res_query === 'bill') {
-            return res.status(200).send(updatedResponse);
-        }
-        else if (res_query === 'download') {
-            //const browser = await puppeteer.connect({
-            //     browserWSEndpoint: `wss://chrome.browserless.io?token=e39874c2-d422-4520-a91a-12d596b382e3`,
-            // });
-
-            const browser = await puppeteer.launch({
-                args: ['--no-sandbox']
-            });
-            const page = await browser.newPage();
-            await page.setContent(updatedResponse);
-
-
-            if (file_type === 'pdf') {
-                const pdfBuffer = await page.pdf({ format: 'A3' });
-                res.setHeader('Content-Type', 'application/pdf');
-                res.setHeader('Content-Disposition', `attachment; filename=${company}_bill_${billMonth}_${refno}.pdf`);
-                res.send(pdfBuffer);
-            } else {
-                await page.setViewport({ width: 400, height: 600 });
-                const screenshotBuffer = await page.screenshot({
-                    fullPage: true,
-                });
-                res.setHeader('Content-Type', 'image/png');
-                res.setHeader('Content-Disposition', `attachment; filename=${company}_bill_${billMonth}_${refno}.png`);
-                res.send(screenshotBuffer);
-            }
-
-            await browser.close();
-
-        }
-        else {
             const billDetails = {
                 type: 'electricity',
                 company,
@@ -448,6 +414,5 @@ exports.handleBill = async (req, res) => {
                 bill_data: compressText(updatedResponse.replace(/\s+/g, ' '))
             };
             res.status(200).json(billDetails);
-        }
 }
 }
