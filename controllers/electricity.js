@@ -316,7 +316,7 @@ exports.handleBill = async (req, res) => {
       
         // Process response
         updatedResponse = updatedResponse.replace(/<div[^>]+class="noprint">.*?<\/div>/is, '');
-        let homeurl = url;
+        let homeurl = req.body.url;
         homeurl = url.replace('http://', '');
         homeurl = url.replace('https://', '');
         homeurl = homeurl.split('/');
