@@ -311,10 +311,11 @@ exports.handleBill = async (req, res) => {
 
         let bill_data = req.body.data;
         let updatedResponse = decompressText(bill_data);
+        
 
       
         // Process response
-        updatedResponse = updatedResponse.data.replace(/<div[^>]+class="noprint">.*?<\/div>/is, '');
+        updatedResponse = updatedResponse.replace(/<div[^>]+class="noprint">.*?<\/div>/is, '');
         let homeurl = url;
         homeurl = url.replace('http://', '');
         homeurl = url.replace('https://', '');
