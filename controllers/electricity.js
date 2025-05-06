@@ -332,8 +332,8 @@ exports.handleBill = async (req, res) => {
         const paid = updatedResponse.includes('Amount Paid');
 
         let $ = cheerio.load(updatedResponse);
-        // const tabcontent = $('.tab-content.active');
-        // $('body').html(tabcontent);
+        const tabcontent = $('.tab-content.active');
+        $('body').html(tabcontent);
 
         const selectors = {
             billMonth: 'body > div.tab-content.active > div.maincontent.fontsize > table:nth-child(2) > tbody > tr.content > td:nth-child(4)',
