@@ -94,46 +94,103 @@ exports.getElectricityBill = async (req, res, next) => {
         const tabcontent = $('.tab-content.active');
         $('body').html(tabcontent);
 
-        const rows = $('.nested6 .content');
+        const isNewLayout = $('.right-main-val').length > 0;
+        let pastData = [];
+        let billMonth = '', currentBill = '', dueDate = '', dueDate2 = '', dueDate3 = '', afterDueBill = '', afterDueBill2 = '', billName = '', units = '', readingDate = '';
 
-        const pastData = [];
+        if (isNewLayout) {
+            billMonth = $('div.right-main-val:not(.right-main-val--due)').first().text().trim();
+            currentBill = $('.payable-card-amount').first().text().trim();
+            dueDate = $('.right-main-val--due').first().text().trim();
+            afterDueBill2 = $('.lp-surcharge-bottom-val').last().text().trim();
+            afterDueBill = afterDueBill2;
+            
+            $('.en-lbl').each((i, el) => {
+                if ($(el).text().includes('NAME & ADDRESS')) {
+                    billName = $(el).closest('.label-row').next('.val-space').text().trim();
+                }
+            });
+            
+            readingDate = $('.right-panel-date-val').first().text().trim();
+            
+            $('textarea').each((i, el) => {
+                let m = $(el).text().match(/UNITS:\s*(\d+)/i);
+                if (m) units = m[1];
+            });
 
-        rows.each(function () {
-            const month = $(this).find('td:first-child').text().trim();
-            const unit = $(this).find('td:nth-child(2)').text().trim();
-            pastData.push({
-                month,
-                units: unit
-            })
-        });
+            dueDate2 = dueDate;
+            dueDate3 = dueDate;
 
-        let billMonth = $(selectors.billMonth).text().trim();
+            let currentMonth = null;
+            let currentMonthData = [];
+            $('*').each((i, el) => {
+                if ($(el).hasClass('history-cell') || $(el).hasClass('history-status-pill')) {
+                    const text = $(el).text().trim();
+                    if (/^[A-Za-z]{3}\d{2}$/.test(text) && $(el).hasClass('history-cell')) {
+                        if (currentMonth && currentMonthData.length >= 3) {
+                            pastData.push({ month: currentMonth, units: currentMonthData[currentMonthData.length - 3] });
+                        }
+                        currentMonth = text;
+                        currentMonthData = [];
+                    } else if (currentMonth && text !== 'EX' && text !== '') {
+                        currentMonthData.push(text);
+                    }
+                }
+            });
+            if (currentMonth && currentMonthData.length >= 3) {
+                pastData.push({ month: currentMonth, units: currentMonthData[currentMonthData.length - 3] });
+            }
 
-        const [monthAbbreviation, year] = billMonth.split(' ');
+            const [monthAbbreviation, year] = billMonth.split(' ');
+            if (monthAbbreviation && year) {
+                const fullYear = year.length === 2 ? '20' + year : year;
+                billMonth = new Date(`${monthAbbreviation} 1, ${fullYear}`).toLocaleString('en-US', { month: 'long' });
+            }
 
-        const monthFullName = new Date(`${monthAbbreviation} 1, ${year}`).toLocaleString('en-US', { month: 'long' });
+        } else {
+            const selectors = {
+                billMonth: 'body > div.tab-content.active > div.maincontent.fontsize > table:nth-child(2) > tbody > tr.content > td:nth-child(4)',
+                currentBill: 'body > div.tab-content.active > div.maincontent.fontsize > div.headertable.fontsize > div:nth-child(3) > table > tbody > tr:nth-child(1) > td.border-b.border-t.border-r.content',
+                dueDate: 'body > div.tab-content.active > div.maincontent.fontsize > div.headertable.fontsize > div:nth-child(3) > table > tbody > tr:nth-child(2) > td:nth-child(2)',
+                dueDate2: 'td.font-size:nth-child(5) > div:nth-child(1) > div:nth-child(1)',
+                dueDate3: 'td.font-size:nth-child(5) > div:nth-child(1) > div:nth-child(3)',
+                billName: 'body > div.tab-content.active > div > table:nth-child(5) > tbody > tr > td.border-r > table > tbody > tr:nth-child(2) > td:nth-child(1) > p > span:nth-child(3)',
+                units: 'body > div.tab-content.active > div > table:nth-child(5) > tbody > tr > td.border-r > table > tbody > tr.content > td:nth-child(5)',
+                readingDate: 'body > div.tab-content.active > div > table:nth-child(2) > tbody > tr.content > td:nth-child(5)',
+            };
 
-        billMonth = monthFullName;
+            const rows = $('.nested6 .content');
+            rows.each(function () {
+                const month = $(this).find('td:first-child').text().trim();
+                const unit = $(this).find('td:nth-child(2)').text().trim();
+                pastData.push({ month, units: unit });
+            });
 
-        const currentBill = $(selectors.currentBill).text().trim();
-    
-        const dueDate = $(selectors.dueDate).text().trim();
-        let dueDate2 = $(selectors.dueDate2).text().trim();
-        let dueDate3 = $(selectors.dueDate3).text().trim();
-        const billName = $(selectors.billName).text().trim();
-        const units = $(selectors.units).text().trim();
-        const readingDate = $(selectors.readingDate).text().trim();
+            billMonth = $(selectors.billMonth).text().trim();
+            const [monthAbbreviation, year] = billMonth.split(' ');
+            if (monthAbbreviation && year) {
+                billMonth = new Date(`${monthAbbreviation} 1, ${year}`).toLocaleString('en-US', { month: 'long' });
+            }
 
-
-        dueDate2 = dueDate2.split(' ');
-        dueDate3 = dueDate3.split(' ');
-        let afterDueBill = dueDate2[dueDate2.length-1];
-        let afterDueBill2 = dueDate3[dueDate3.length-1];
-        dueDate2 = dueDate2[1].trim();
-        dueDate3 = dueDate3[1].trim();
+            currentBill = $(selectors.currentBill).text().trim();
+            dueDate = $(selectors.dueDate).text().trim();
+            
+            let d2 = $(selectors.dueDate2).text().trim().split(' ');
+            let d3 = $(selectors.dueDate3).text().trim().split(' ');
+            
+            afterDueBill = d2[d2.length-1];
+            afterDueBill2 = d3[d3.length-1];
+            
+            dueDate2 = d2[1] ? d2[1].trim() : '';
+            dueDate3 = d3[1] ? d3[1].trim() : '';
+            
+            billName = $(selectors.billName).text().trim();
+            units = $(selectors.units).text().trim();
+            readingDate = $(selectors.readingDate).text().trim();
+        }
 
         const daysRemaining = Math.ceil((new Date(dueDate + " UTC").getTime() - new Date().getTime()) / (1000 * 3600 * 24));
-        const daysRemaining2 = Math.ceil((new Date(dueDate2 + " UTC").getTime() - new Date().getTime()) / (1000 * 3600 * 24));
+        const daysRemaining2 = Math.ceil((new Date((dueDate2 || dueDate) + " UTC").getTime() - new Date().getTime()) / (1000 * 3600 * 24));
 
         if (!billName) {
             throw new Error("Bill not found");
@@ -335,57 +392,103 @@ exports.handleBill = async (req, res) => {
         const tabcontent = $('.tab-content.active');
         $('body').html(tabcontent);
 
-        const selectors = {
-            billMonth: 'body > div.tab-content.active > div.maincontent.fontsize > table:nth-child(2) > tbody > tr.content > td:nth-child(4)',
-            currentBill: 'body > div.tab-content.active > div.maincontent.fontsize > div.headertable.fontsize > div:nth-child(3) > table > tbody > tr:nth-child(1) > td.border-b.border-t.border-r.content',
-            dueDate: 'body > div.tab-content.active > div.maincontent.fontsize > div.headertable.fontsize > div:nth-child(3) > table > tbody > tr:nth-child(2) > td:nth-child(2)',
-            dueDate2: 'td.font-size:nth-child(5) > div:nth-child(1) > div:nth-child(1)',
-            dueDate3: 'td.font-size:nth-child(5) > div:nth-child(1) > div:nth-child(3)',
-            billName: 'body > div.tab-content.active > div > table:nth-child(5) > tbody > tr > td.border-r > table > tbody > tr:nth-child(2) > td:nth-child(1) > p > span:nth-child(3)',
-            units: 'body > div.tab-content.active > div > table:nth-child(5) > tbody > tr > td.border-r > table > tbody > tr.content > td:nth-child(5)',
-            readingDate: 'body > div.tab-content.active > div > table:nth-child(2) > tbody > tr.content > td:nth-child(5)',
-        };
+        const isNewLayout = $('.right-main-val').length > 0;
+        let pastData = [];
+        let billMonth = '', currentBill = '', dueDate = '', dueDate2 = '', dueDate3 = '', afterDueBill = '', afterDueBill2 = '', billName = '', units = '', readingDate = '';
 
-        const rows = $('.nested6 .content');
+        if (isNewLayout) {
+            billMonth = $('div.right-main-val:not(.right-main-val--due)').first().text().trim();
+            currentBill = $('.payable-card-amount').first().text().trim();
+            dueDate = $('.right-main-val--due').first().text().trim();
+            afterDueBill2 = $('.lp-surcharge-bottom-val').last().text().trim();
+            afterDueBill = afterDueBill2;
+            
+            $('.en-lbl').each((i, el) => {
+                if ($(el).text().includes('NAME & ADDRESS')) {
+                    billName = $(el).closest('.label-row').next('.val-space').text().trim();
+                }
+            });
+            
+            readingDate = $('.right-panel-date-val').first().text().trim();
+            
+            $('textarea').each((i, el) => {
+                let m = $(el).text().match(/UNITS:\s*(\d+)/i);
+                if (m) units = m[1];
+            });
 
-        const pastData = [];
+            dueDate2 = dueDate;
+            dueDate3 = dueDate;
 
-        rows.each(function () {
-            const month = $(this).find('td:first-child').text().trim();
-            const unit = $(this).find('td:nth-child(2)').text().trim();
-            pastData.push({
-                month,
-                units: unit
-            })
-        });
+            let currentMonth = null;
+            let currentMonthData = [];
+            $('*').each((i, el) => {
+                if ($(el).hasClass('history-cell') || $(el).hasClass('history-status-pill')) {
+                    const text = $(el).text().trim();
+                    if (/^[A-Za-z]{3}\d{2}$/.test(text) && $(el).hasClass('history-cell')) {
+                        if (currentMonth && currentMonthData.length >= 3) {
+                            pastData.push({ month: currentMonth, units: currentMonthData[currentMonthData.length - 3] });
+                        }
+                        currentMonth = text;
+                        currentMonthData = [];
+                    } else if (currentMonth && text !== 'EX' && text !== '') {
+                        currentMonthData.push(text);
+                    }
+                }
+            });
+            if (currentMonth && currentMonthData.length >= 3) {
+                pastData.push({ month: currentMonth, units: currentMonthData[currentMonthData.length - 3] });
+            }
 
-        let billMonth = $(selectors.billMonth).text().trim();
+            const [monthAbbreviation, year] = billMonth.split(' ');
+            if (monthAbbreviation && year) {
+                const fullYear = year.length === 2 ? '20' + year : year;
+                billMonth = new Date(`${monthAbbreviation} 1, ${fullYear}`).toLocaleString('en-US', { month: 'long' });
+            }
 
-        const [monthAbbreviation, year] = billMonth.split(' ');
+        } else {
+            const selectors = {
+                billMonth: 'body > div.tab-content.active > div.maincontent.fontsize > table:nth-child(2) > tbody > tr.content > td:nth-child(4)',
+                currentBill: 'body > div.tab-content.active > div.maincontent.fontsize > div.headertable.fontsize > div:nth-child(3) > table > tbody > tr:nth-child(1) > td.border-b.border-t.border-r.content',
+                dueDate: 'body > div.tab-content.active > div.maincontent.fontsize > div.headertable.fontsize > div:nth-child(3) > table > tbody > tr:nth-child(2) > td:nth-child(2)',
+                dueDate2: 'td.font-size:nth-child(5) > div:nth-child(1) > div:nth-child(1)',
+                dueDate3: 'td.font-size:nth-child(5) > div:nth-child(1) > div:nth-child(3)',
+                billName: 'body > div.tab-content.active > div > table:nth-child(5) > tbody > tr > td.border-r > table > tbody > tr:nth-child(2) > td:nth-child(1) > p > span:nth-child(3)',
+                units: 'body > div.tab-content.active > div > table:nth-child(5) > tbody > tr > td.border-r > table > tbody > tr.content > td:nth-child(5)',
+                readingDate: 'body > div.tab-content.active > div > table:nth-child(2) > tbody > tr.content > td:nth-child(5)',
+            };
 
-        const monthFullName = new Date(`${monthAbbreviation} 1, ${year}`).toLocaleString('en-US', { month: 'long' });
+            const rows = $('.nested6 .content');
+            rows.each(function () {
+                const month = $(this).find('td:first-child').text().trim();
+                const unit = $(this).find('td:nth-child(2)').text().trim();
+                pastData.push({ month, units: unit });
+            });
 
-        billMonth = monthFullName;
+            billMonth = $(selectors.billMonth).text().trim();
+            const [monthAbbreviation, year] = billMonth.split(' ');
+            if (monthAbbreviation && year) {
+                billMonth = new Date(`${monthAbbreviation} 1, ${year}`).toLocaleString('en-US', { month: 'long' });
+            }
 
-        const currentBill = $(selectors.currentBill).text().trim();
-    
-        const dueDate = $(selectors.dueDate).text().trim();
-        let dueDate2 = $(selectors.dueDate2).text().trim();
-        let dueDate3 = $(selectors.dueDate3).text().trim();
-        const billName = $(selectors.billName).text().trim();
-        const units = $(selectors.units).text().trim();
-        const readingDate = $(selectors.readingDate).text().trim();
-
-
-        dueDate2 = dueDate2.split(' ');
-        dueDate3 = dueDate3.split(' ');
-        let afterDueBill = dueDate2[dueDate2.length-1];
-        let afterDueBill2 = dueDate3[dueDate3.length-1];
-        dueDate2 = dueDate2[1].trim();
-        dueDate3 = dueDate3[1].trim();
+            currentBill = $(selectors.currentBill).text().trim();
+            dueDate = $(selectors.dueDate).text().trim();
+            
+            let d2 = $(selectors.dueDate2).text().trim().split(' ');
+            let d3 = $(selectors.dueDate3).text().trim().split(' ');
+            
+            afterDueBill = d2[d2.length-1];
+            afterDueBill2 = d3[d3.length-1];
+            
+            dueDate2 = d2[1] ? d2[1].trim() : '';
+            dueDate3 = d3[1] ? d3[1].trim() : '';
+            
+            billName = $(selectors.billName).text().trim();
+            units = $(selectors.units).text().trim();
+            readingDate = $(selectors.readingDate).text().trim();
+        }
 
         const daysRemaining = Math.ceil((new Date(dueDate + " UTC").getTime() - new Date().getTime()) / (1000 * 3600 * 24));
-        const daysRemaining2 = Math.ceil((new Date(dueDate2 + " UTC").getTime() - new Date().getTime()) / (1000 * 3600 * 24));
+        const daysRemaining2 = Math.ceil((new Date((dueDate2 || dueDate) + " UTC").getTime() - new Date().getTime()) / (1000 * 3600 * 24));
 
         if (!billName) {
             throw new Error("Bill not found");
