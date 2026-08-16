@@ -10,26 +10,26 @@ exports.getElectricityBill = async (req, res, next) => {
     const [company, url] = getCompany(refno);
 
     try {
-        
+
         const cookieJar = new tough.CookieJar();
         const axiosInstance = axios.create({
-          jar: cookieJar
+            jar: cookieJar
         });
-      
-          const getResponse = await axiosInstance.get(url);
-          
-          const $init = cheerio.load(getResponse.data);
-      
-          const cookies = getResponse.headers['set-cookie'];
-          const cookieToken = cookies.find(c => c.includes('__RequestVerificationToken')).split(';')[0];
-          const sessionCookie = cookies.find(c => c.includes('ASP.NET_SessionId')).split(';')[0];
-      
-          const formToken = $init('input[name="__RequestVerificationToken"]').val();
-          const viewState = $init('#__VIEWSTATE').val();
-          const eventValidation = $init('#__EVENTVALIDATION').val();
-          const viewStateGenerator = $init('#__VIEWSTATEGENERATOR').val();
-      
-          const formData = new URLSearchParams({
+
+        const getResponse = await axiosInstance.get(url);
+
+        const $init = cheerio.load(getResponse.data);
+
+        const cookies = getResponse.headers['set-cookie'];
+        const cookieToken = cookies.find(c => c.includes('__RequestVerificationToken')).split(';')[0];
+        const sessionCookie = cookies.find(c => c.includes('ASP.NET_SessionId')).split(';')[0];
+
+        const formToken = $init('input[name="__RequestVerificationToken"]').val();
+        const viewState = $init('#__VIEWSTATE').val();
+        const eventValidation = $init('#__EVENTVALIDATION').val();
+        const viewStateGenerator = $init('#__VIEWSTATEGENERATOR').val();
+
+        const formData = new URLSearchParams({
             __VIEWSTATE: viewState,
             __VIEWSTATEGENERATOR: viewStateGenerator,
             __EVENTVALIDATION: eventValidation,
@@ -38,20 +38,20 @@ exports.getElectricityBill = async (req, res, next) => {
             ruCodeTextBox: '',
             __RequestVerificationToken: formToken,
             btnSearch: 'Search'
-          });
-      
-          const postResponse = await axiosInstance.post(
+        });
+
+        const postResponse = await axiosInstance.post(
             url,
             formData.toString(),
             {
-              headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'Referer': url,
-                'Cookie': `${cookieToken}; ${sessionCookie}`
-              }
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'Referer': url,
+                    'Cookie': `${cookieToken}; ${sessionCookie}`
+                }
             }
-          );
-       
+        );
+
 
         // Process response
         let updatedResponse = postResponse.data.replace(/<div[^>]+class="noprint">.*?<\/div>/is, '');
@@ -104,15 +104,15 @@ exports.getElectricityBill = async (req, res, next) => {
             dueDate = $('.right-main-val--due').first().text().trim();
             afterDueBill2 = $('.lp-surcharge-bottom-val').last().text().trim();
             afterDueBill = afterDueBill2;
-            
+
             $('.en-lbl').each((i, el) => {
                 if ($(el).text().includes('NAME & ADDRESS')) {
                     billName = $(el).closest('.label-row').next('.val-space').text().trim();
                 }
             });
-            
+
             readingDate = $('.right-panel-date-val').first().text().trim();
-            
+
             $('textarea').each((i, el) => {
                 let m = $(el).text().match(/UNITS:\s*(\d+)/i);
                 if (m) units = m[1];
@@ -174,17 +174,19 @@ exports.getElectricityBill = async (req, res, next) => {
 
             currentBill = $(selectors.currentBill).text().trim();
             dueDate = $(selectors.dueDate).text().trim();
-            
+
             let d2 = $(selectors.dueDate2).text().trim().split(' ');
             let d3 = $(selectors.dueDate3).text().trim().split(' ');
-            
-            afterDueBill = d2[d2.length-1];
-            afterDueBill2 = d3[d3.length-1];
-            
+
+            afterDueBill = d2[d2.length - 1];
+            afterDueBill2 = d3[d3.length - 1];
+
             dueDate2 = d2[1] ? d2[1].trim() : '';
             dueDate3 = d3[1] ? d3[1].trim() : '';
-            
+
             billName = $(selectors.billName).text().trim();
+            console.log(billName);
+
             units = $(selectors.units).text().trim();
             readingDate = $(selectors.readingDate).text().trim();
         }
@@ -192,9 +194,14 @@ exports.getElectricityBill = async (req, res, next) => {
         const daysRemaining = Math.ceil((new Date(dueDate + " UTC").getTime() - new Date().getTime()) / (1000 * 3600 * 24));
         const daysRemaining2 = Math.ceil((new Date((dueDate2 || dueDate) + " UTC").getTime() - new Date().getTime()) / (1000 * 3600 * 24));
 
+        console.log(billName);
+
+
         if (!billName) {
             throw new Error("Bill not found");
         }
+
+        billName = billName.split(',')[0].trim();
 
 
         $('.tabs.noprint').remove();
@@ -254,7 +261,7 @@ exports.getElectricityBill = async (req, res, next) => {
             };
             res.status(200).json(billDetails);
         }
-           
+
 
     } catch (error) {
         return res.status(500).send({
@@ -292,64 +299,64 @@ const getCompany = ref => {
         ]
 
     } else if (disco_code === 12000) {
-            return [
-                'GEPCO',
-                "https://bill.pitc.com.pk/gepcobill"
-            ]
+        return [
+            'GEPCO',
+            "https://bill.pitc.com.pk/gepcobill"
+        ]
 
     } else if (disco_code === 13000) {
-        
-            return [
-                'FESCO',
-                "https://bill.pitc.com.pk/fescobill"
-            ]
-        
+
+        return [
+            'FESCO',
+            "https://bill.pitc.com.pk/fescobill"
+        ]
+
 
     } else if (disco_code === 14000) {
-        
-            return [
-                'IESCO',
-                "https://bill.pitc.com.pk/iescobill"
-            ]
-        
+
+        return [
+            'IESCO',
+            "https://bill.pitc.com.pk/iescobill"
+        ]
+
 
     } else if (disco_code === 15000) {
-        
-            return [
-                'MEPCO',
-                "https://bill.pitc.com.pk/mepcobill"
-            ]
-        
+
+        return [
+            'MEPCO',
+            "https://bill.pitc.com.pk/mepcobill"
+        ]
 
 
-    } else if (disco_code === 26000) {    
-            return [
-                'PESCO',
-                "https://bill.pitc.com.pk/pescobill"
-            ]
-        
+
+    } else if (disco_code === 26000) {
+        return [
+            'PESCO',
+            "https://bill.pitc.com.pk/pescobill"
+        ]
+
 
     } else if (disco_code === 37000) {
-        
-            return [
-                'HESCO',
-                "https://bill.pitc.com.pk/hescobill"
-            ]
-        
+
+        return [
+            'HESCO',
+            "https://bill.pitc.com.pk/hescobill"
+        ]
+
 
     } else if (disco_code === 38000) {
-        
-            return [
-                'SEPCO',
-                "https://bill.pitc.com.pk/sepcobill"
-            ]
-        
+
+        return [
+            'SEPCO',
+            "https://bill.pitc.com.pk/sepcobill"
+        ]
+
     } else {
-        
-            return [
-                'QESCO',
-                "https://bill.pitc.com.pk/qescobill"
-            ] 
+
+        return [
+            'QESCO',
+            "https://bill.pitc.com.pk/qescobill"
+        ]
     }
 }
 
@@ -362,15 +369,15 @@ const decompressText = (compressedData) => {
 
 
 exports.handleBill = async (req, res) => {
-   
+
     if (req.body && req.body.data) {
 
 
         let bill_data = req.body.data;
         let updatedResponse = decompressText(bill_data);
-        
 
-      
+
+
         // Process response
         updatedResponse = updatedResponse.replace(/<div[^>]+class="noprint">.*?<\/div>/is, '');
         let homeurl = "https://bill.pitc.com.pk/";
@@ -402,15 +409,15 @@ exports.handleBill = async (req, res) => {
             dueDate = $('.right-main-val--due').first().text().trim();
             afterDueBill2 = $('.lp-surcharge-bottom-val').last().text().trim();
             afterDueBill = afterDueBill2;
-            
+
             $('.en-lbl').each((i, el) => {
                 if ($(el).text().includes('NAME & ADDRESS')) {
                     billName = $(el).closest('.label-row').next('.val-space').text().trim();
                 }
             });
-            
+
             readingDate = $('.right-panel-date-val').first().text().trim();
-            
+
             $('textarea').each((i, el) => {
                 let m = $(el).text().match(/UNITS:\s*(\d+)/i);
                 if (m) units = m[1];
@@ -472,17 +479,20 @@ exports.handleBill = async (req, res) => {
 
             currentBill = $(selectors.currentBill).text().trim();
             dueDate = $(selectors.dueDate).text().trim();
-            
+
             let d2 = $(selectors.dueDate2).text().trim().split(' ');
             let d3 = $(selectors.dueDate3).text().trim().split(' ');
-            
-            afterDueBill = d2[d2.length-1];
-            afterDueBill2 = d3[d3.length-1];
-            
+
+            afterDueBill = d2[d2.length - 1];
+            afterDueBill2 = d3[d3.length - 1];
+
             dueDate2 = d2[1] ? d2[1].trim() : '';
             dueDate3 = d3[1] ? d3[1].trim() : '';
-            
+
             billName = $(selectors.billName).text().trim();
+            billName = billName.split(',')[0].trim();
+
+
             units = $(selectors.units).text().trim();
             readingDate = $(selectors.readingDate).text().trim();
         }
@@ -499,23 +509,23 @@ exports.handleBill = async (req, res) => {
         $('.tabcontent:nth-child(2)').remove();
         updatedResponse = $.html();
 
-            const billDetails = {
-                type: 'electricity',
-                company: req.body.company,
-                ref: req.body.refno,
-                bill_name: billName,
-                units: units + ' Units',
-                bill_month: billMonth,
-                reading_date: convertDate(readingDate),
-                current_bill: currentBill,
-                payable: 999,
-                paid,
-                after_due_bill: afterDueBill2,
-                due_date: convertDate(dueDate),
-                remaining_days: daysRemaining,
-                past_data: pastData,
-                bill_data: compressText(updatedResponse.replace(/\s+/g, ' '))
-            };
-            res.status(200).json(billDetails);
-}
+        const billDetails = {
+            type: 'electricity',
+            company: req.body.company,
+            ref: req.body.refno,
+            bill_name: billName,
+            units: units + ' Units',
+            bill_month: billMonth,
+            reading_date: convertDate(readingDate),
+            current_bill: currentBill,
+            payable: 999,
+            paid,
+            after_due_bill: afterDueBill2,
+            due_date: convertDate(dueDate),
+            remaining_days: daysRemaining,
+            past_data: pastData,
+            bill_data: compressText(updatedResponse.replace(/\s+/g, ' '))
+        };
+        res.status(200).json(billDetails);
+    }
 }
