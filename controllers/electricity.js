@@ -23,10 +23,10 @@ async function injectQRCodesServerSide($) {
 
         promises.push(
             QRCode.toDataURL(text.trim(), { errorCorrectionLevel: 'M', width: 80, margin: 2, color: { dark: '#000000', light: '#ffffff' } })
-            .then(url => {
-                host.empty();
-                host.append(`<img src="${url}" class="bill-qr-canvas bill-qr-canvas--header" role="img" aria-label="QR code" style="width: 80px; height: 80px; display: block; max-width: none; max-height: none;" />`);
-            })
+                .then(url => {
+                    host.empty();
+                    host.append(`<img src="${url}" class="bill-qr-canvas bill-qr-canvas--header" role="img" aria-label="QR code" style="width: 80px; height: 80px; display: block; max-width: none; max-height: none;" />`);
+                })
         );
     });
 
@@ -41,10 +41,10 @@ async function injectQRCodesServerSide($) {
 
         promises.push(
             QRCode.toDataURL(text.trim(), { errorCorrectionLevel: 'L', width: 300, margin: 4, color: { dark: '#000000', light: '#ffffff' } })
-            .then(url => {
-                host.empty();
-                host.append(`<img src="${url}" class="bill-qr-canvas bill-qr-canvas--charges" role="img" aria-label="QR code" style="width: 150px; height: 150px; display: block; max-width: none; max-height: none;" />`);
-            })
+                .then(url => {
+                    host.empty();
+                    host.append(`<img src="${url}" class="bill-qr-canvas bill-qr-canvas--charges" role="img" aria-label="QR code" style="width: 150px; height: 150px; display: block; max-width: none; max-height: none;" />`);
+                })
         );
     });
 
@@ -59,10 +59,10 @@ async function injectQRCodesServerSide($) {
 
         promises.push(
             QRCode.toDataURL(text.trim(), { errorCorrectionLevel: 'L', width: 80, margin: 2, color: { dark: '#000000', light: '#ffffff' } })
-            .then(url => {
-                host.empty();
-                host.append(`<img src="${url}" class="bill-qr-canvas bill-qr-canvas--subsidy" role="img" aria-label="QR code" style="width: 80px; height: 80px; display: block; max-width: none; max-height: none;" />`);
-            })
+                .then(url => {
+                    host.empty();
+                    host.append(`<img src="${url}" class="bill-qr-canvas bill-qr-canvas--subsidy" role="img" aria-label="QR code" style="width: 80px; height: 80px; display: block; max-width: none; max-height: none;" />`);
+                })
         );
     });
 
@@ -90,7 +90,7 @@ async function injectBarcodesServerSide($) {
                         const svgText = xmlSerializer.serializeToString(svgNode);
                         const base64Svg = Buffer.from(svgText).toString('base64');
                         $(selector).replaceWith(`<img src="data:image/svg+xml;base64,${base64Svg}" style="width: 100%; max-width: 400px; height: auto;" alt="barcode" />`);
-                    } catch (err) {}
+                    } catch (err) { }
                 }
             }
         }
@@ -416,7 +416,7 @@ exports.getElectricityBill = async (req, res, next) => {
         await injectBarcodesServerSide($);
 
         $('script').remove();
-        
+
         updatedResponse = $.html();
 
         if (res_query === 'bill') {
@@ -714,6 +714,7 @@ exports.handleBill = async (req, res) => {
         if (!billName) {
             throw new Error("Bill not found");
         }
+        billName = billName.split(',')[0].trim();
 
 
         if ($('#maincontent-1').length > 0) {
