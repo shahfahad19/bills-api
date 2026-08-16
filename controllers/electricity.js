@@ -3,208 +3,99 @@ const cheerio = require('cheerio');
 const zlib = require('zlib');
 const tough = require('tough-cookie');
 
-const QR_CODE_SCRIPT = `<script>
-/**
- * Bill QR codes — header payment QR and charges detail QR.
- * Uses the qrcode library for crisp modules; tap-to-enlarge for mobile scanning.
- */
-(function () {
-    var QR_MODULE_URL = "https://cdn.jsdelivr.net/npm/qrcode@1.5.3/+esm";
+const QRCode = require('qrcode');
+const { DOMImplementation, XMLSerializer } = require('xmldom');
+const JsBarcode = require('jsbarcode');
+const xmlSerializer = new XMLSerializer();
+const documentImpl = new DOMImplementation().createDocument('http://www.w3.org/1999/xhtml', 'html', null);
 
-    var SIZES = {
-        header: { display: 80, modal: 360, ecLevel: "M" },
-        charges: { display: 150, displayMargin: 4, displayScale: 2, modal: 400, modalMargin: 2, ecLevel: "L" },
-        subsidy: { display: 80, modal: 320, ecLevel: "L" }
-    };
+async function injectQRCodesServerSide($) {
+    const promises = [];
 
-    var qrModulePromise = null;
-    var modalEl = null;
-    var modalHost = null;
-    var modalHint = null;
+    $('.header-qr-host').each((_, el) => {
+        const host = $(el);
+        const id = host.attr('id') || '';
+        const idx = id.replace('header_bill_qrcode_', '');
+        const textEl = $(`#header_qr_text_${idx}`);
+        if (!textEl.length) return;
+        const text = textEl.val() || textEl.attr('value') || textEl.text();
+        if (!text || !text.trim()) return;
 
-    function loadQrModule() {
-        if (!qrModulePromise) {
-            qrModulePromise = import(QR_MODULE_URL).then(function (module) {
-                return module.default;
-            });
-        }
-        return qrModulePromise;
-    }
+        promises.push(
+            QRCode.toDataURL(text.trim(), { errorCorrectionLevel: 'M', width: 80, margin: 2, color: { dark: '#000000', light: '#ffffff' } })
+            .then(url => {
+                host.empty();
+                host.append(`<img src="${url}" class="bill-qr-canvas bill-qr-canvas--header" role="img" aria-label="QR code" style="width: 80px; height: 80px; display: block; max-width: none; max-height: none;" />`);
+            })
+        );
+    });
 
-    function renderQr(host, text, size, ecLevel, canvasClass, margin, renderScale) {
-        var pixelSize = typeof renderScale === "number" && renderScale > 1 ? size * renderScale : size;
+    $('.qr-charges-host').each((_, el) => {
+        const host = $(el);
+        const id = host.attr('id') || '';
+        const idx = id.replace('charges_qrcode_', '');
+        const textEl = $(`#charges_qr_text_${idx}`);
+        if (!textEl.length) return;
+        const text = textEl.val() || textEl.attr('value') || textEl.text();
+        if (!text || !text.trim()) return;
 
-        return loadQrModule().then(function (QRCode) {
-            host.innerHTML = "";
-            var canvas = document.createElement("canvas");
-            canvas.className = canvasClass || "bill-qr-canvas";
-            canvas.setAttribute("role", "img");
-            canvas.setAttribute("aria-label", "QR code");
-            host.appendChild(canvas);
+        promises.push(
+            QRCode.toDataURL(text.trim(), { errorCorrectionLevel: 'L', width: 300, margin: 4, color: { dark: '#000000', light: '#ffffff' } })
+            .then(url => {
+                host.empty();
+                host.append(`<img src="${url}" class="bill-qr-canvas bill-qr-canvas--charges" role="img" aria-label="QR code" style="width: 150px; height: 150px; display: block; max-width: none; max-height: none;" />`);
+            })
+        );
+    });
 
-            return QRCode.toCanvas(canvas, text, {
-                errorCorrectionLevel: ecLevel,
-                width: pixelSize,
-                margin: typeof margin === "number" ? margin : 2,
-                color: {
-                    dark: "#000000",
-                    light: "#ffffff"
+    $('.subsidy-qr-host').each((_, el) => {
+        const host = $(el);
+        const id = host.attr('id') || '';
+        const idx = id.replace('subsidy_qr_', '');
+        const textEl = $(`#subsidy_qr_text_${idx}`);
+        if (!textEl.length) return;
+        const text = textEl.val() || textEl.attr('value') || textEl.text();
+        if (!text || !text.trim()) return;
+
+        promises.push(
+            QRCode.toDataURL(text.trim(), { errorCorrectionLevel: 'L', width: 80, margin: 2, color: { dark: '#000000', light: '#ffffff' } })
+            .then(url => {
+                host.empty();
+                host.append(`<img src="${url}" class="bill-qr-canvas bill-qr-canvas--subsidy" role="img" aria-label="QR code" style="width: 80px; height: 80px; display: block; max-width: none; max-height: none;" />`);
+            })
+        );
+    });
+
+    await Promise.all(promises);
+}
+
+async function injectBarcodesServerSide($) {
+    const scripts = $('script').map((i, el) => $(el).html()).get();
+    for (const script of scripts) {
+        if (script && script.includes('JsBarcode')) {
+            const matches = [...script.matchAll(/JsBarcode\(\s*['"]([^'"]+)['"]\s*,\s*['"]([^'"]+)['"]/g)];
+            for (const match of matches) {
+                const selector = match[1];
+                const text = match[2];
+                if (selector && text) {
+                    try {
+                        const svgNode = documentImpl.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                        JsBarcode(svgNode, text, {
+                            xmlDocument: documentImpl,
+                            width: 1,
+                            height: 50,
+                            margin: 5,
+                            displayValue: false
+                        });
+                        const svgText = xmlSerializer.serializeToString(svgNode);
+                        const base64Svg = Buffer.from(svgText).toString('base64');
+                        $(selector).replaceWith(`<img src="data:image/svg+xml;base64,${base64Svg}" style="width: 100%; max-width: 400px; height: auto;" alt="barcode" />`);
+                    } catch (err) {}
                 }
-            }).then(function () {
-                canvas.style.width = size + "px";
-                canvas.style.height = size + "px";
-                canvas.style.display = "block";
-                canvas.style.maxWidth = "none";
-                canvas.style.maxHeight = "none";
-            });
-        });
-    }
-
-    function ensureModal() {
-        if (modalEl) {
-            return;
-        }
-
-        modalEl = document.createElement("div");
-        modalEl.id = "bill-qr-modal";
-        modalEl.className = "bill-qr-modal gbn-is-hidden";
-        modalEl.setAttribute("aria-hidden", "true");
-        modalEl.innerHTML =
-            "<div class=\\"bill-qr-modal-backdrop\\" data-close=\\"1\\"></div>" +
-            "<div class=\\"bill-qr-modal-panel\\" role=\\"dialog\\" aria-modal=\\"true\\" aria-label=\\"QR code\\">" +
-            "<div class=\\"bill-qr-modal-host\\"></div>" +
-            "<p class=\\"bill-qr-modal-hint\\">Scan the code, then tap outside to close</p>" +
-            "</div>";
-
-        document.body.appendChild(modalEl);
-        modalHost = modalEl.querySelector(".bill-qr-modal-host");
-        modalHint = modalEl.querySelector(".bill-qr-modal-hint");
-
-        modalEl.addEventListener("click", function (event) {
-            if (event.target.getAttribute("data-close") === "1") {
-                closeModal();
-            }
-        });
-
-        document.addEventListener("keydown", function (event) {
-            if (event.key === "Escape") {
-                closeModal();
-            }
-        });
-    }
-
-    function openModal(text, size, ecLevel, label, margin) {
-        ensureModal();
-        if (modalHint) {
-            if (label) {
-                modalHint.textContent = label;
-                modalHint.style.display = "";
-            } else {
-                modalHint.style.display = "none";
             }
         }
-        modalEl.classList.remove("gbn-is-hidden");
-        modalEl.setAttribute("aria-hidden", "false");
-        document.body.classList.add("bill-qr-modal-open");
-        renderQr(modalHost, text, size, ecLevel, "bill-qr-canvas bill-qr-canvas--modal", margin);
     }
-
-    function closeModal() {
-        if (!modalEl) {
-            return;
-        }
-        modalEl.classList.add("gbn-is-hidden");
-        modalEl.setAttribute("aria-hidden", "true");
-        document.body.classList.remove("bill-qr-modal-open");
-        if (modalHost) {
-            modalHost.innerHTML = "";
-        }
-    }
-
-    function initQrHost(host, config) {
-        if (host.getAttribute("data-bill-qr-init") === "1") {
-            return;
-        }
-
-        var textEl = document.getElementById(config.textId);
-        if (!textEl) {
-            return;
-        }
-
-        var text = textEl.value;
-        if (!text || !text.trim()) {
-            return;
-        }
-
-        host.setAttribute("data-bill-qr-init", "1");
-
-        renderQr(host, text, config.display, config.ecLevel, config.canvasClass, config.displayMargin, config.displayScale).catch(function () {
-            host.innerHTML = "<span class=\\"bill-qr-error\\">QR unavailable</span>";
-        });
-
-        var trigger = host.closest(config.triggerClass);
-        if (trigger) {
-            trigger.addEventListener("click", function () {
-                openModal(text, config.modal, config.ecLevel, config.modalHint, config.modalMargin);
-            });
-        }
-    }
-
-    function initHeaderQr(host) {
-        var billIdx = host.id.replace("header_bill_qrcode_", "");
-        initQrHost(host, {
-            textId: "header_qr_text_" + billIdx,
-            triggerClass: ".header-qr-trigger",
-            display: SIZES.header.display,
-            modal: SIZES.header.modal,
-            ecLevel: SIZES.header.ecLevel,
-            canvasClass: "bill-qr-canvas bill-qr-canvas--header",
-            modalHint: "Scan payment QR, then tap outside to close"
-        });
-    }
-
-    function initChargesQr(host) {
-        var billIdx = host.id.replace("charges_qrcode_", "");
-        initQrHost(host, {
-            textId: "charges_qr_text_" + billIdx,
-            triggerClass: ".qr-charges-trigger",
-            display: SIZES.charges.display,
-            displayMargin: SIZES.charges.displayMargin,
-            displayScale: SIZES.charges.displayScale,
-            modal: SIZES.charges.modal,
-            modalMargin: SIZES.charges.modalMargin,
-            ecLevel: SIZES.charges.ecLevel,
-            canvasClass: "bill-qr-canvas bill-qr-canvas--charges",
-            modalHint: "Scan charges QR, then tap outside to close"
-        });
-    }
-
-    function initSubsidyQr(host) {
-        var billIdx = host.id.replace("subsidy_qr_", "");
-        initQrHost(host, {
-            textId: "subsidy_qr_text_" + billIdx,
-            triggerClass: ".subsidy-qr-trigger",
-            display: SIZES.subsidy.display,
-            modal: SIZES.subsidy.modal,
-            ecLevel: SIZES.subsidy.ecLevel,
-            canvasClass: "bill-qr-canvas bill-qr-canvas--subsidy",
-            modalHint: "Scan subsidy QR, then tap outside to close"
-        });
-    }
-
-    function initAll() {
-        document.querySelectorAll(".header-qr-host").forEach(initHeaderQr);
-        document.querySelectorAll(".qr-charges-host").forEach(initChargesQr);
-        document.querySelectorAll(".subsidy-qr-host").forEach(initSubsidyQr);
-    }
-
-    if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", initAll);
-    } else {
-        initAll();
-    }
-})();
-</script>`;
+}
 
 async function injectMeterSnapsServerSide($) {
     const grids = $('[data-meter-snaps]');
@@ -519,9 +410,12 @@ exports.getElectricityBill = async (req, res, next) => {
         }
         $('.tabs.noprint').remove();
         $('.tabcontent:nth-child(2)').remove();
-        $('body').append(QR_CODE_SCRIPT);
 
         await injectMeterSnapsServerSide($);
+        await injectQRCodesServerSide($);
+        await injectBarcodesServerSide($);
+
+        $('script').remove();
         
         updatedResponse = $.html();
 
@@ -827,9 +721,12 @@ exports.handleBill = async (req, res) => {
         }
         $('.tabs.noprint').remove();
         $('.tabcontent:nth-child(2)').remove();
-        $('body').append(QR_CODE_SCRIPT);
 
         await injectMeterSnapsServerSide($);
+        await injectQRCodesServerSide($);
+        await injectBarcodesServerSide($);
+
+        $('script').remove();
 
         updatedResponse = $.html();
 
