@@ -204,6 +204,9 @@ exports.getElectricityBill = async (req, res, next) => {
         billName = billName.split(',')[0].trim();
 
 
+        if ($('#maincontent-1').length > 0) {
+            $('body').html($('#maincontent-1'));
+        }
         $('.tabs.noprint').remove();
         $('.tabcontent:nth-child(2)').remove();
         updatedResponse = $.html();
@@ -505,6 +508,9 @@ exports.handleBill = async (req, res) => {
         }
 
 
+        if ($('#maincontent-1').length > 0) {
+            $('body').html($('#maincontent-1'));
+        }
         $('.tabs.noprint').remove();
         $('.tabcontent:nth-child(2)').remove();
         updatedResponse = $.html();
