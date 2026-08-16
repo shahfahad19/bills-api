@@ -3,6 +3,113 @@ const cheerio = require('cheerio');
 const zlib = require('zlib');
 const tough = require('tough-cookie');
 
+async function injectMeterSnapsServerSide($) {
+    const grids = $('[data-meter-snaps]');
+    if (grids.length === 0) return;
+
+    const promises = [];
+
+    grids.each((_, gridEl) => {
+        const grid = $(gridEl);
+        const meterCount = parseInt(grid.attr('data-meter-count'), 10) || 0;
+        if (meterCount < 1) return;
+
+        const refNo = grid.attr('data-ref-no');
+        const billMonth = grid.attr('data-bill-month');
+
+        if (!refNo || !billMonth) return;
+
+        const p = (async () => {
+            try {
+                const res = await axios.post('https://usersnap.pitc.com.pk/api/SnapsForDuplicateBill/ToDuplicate', {
+                    REF_NO: refNo,
+                    BILL_MONTH: billMonth
+                }, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    }
+                });
+
+                if (res.data && String(res.data.STATUS) === '1' && res.data.DATA && res.data.DATA[0]) {
+                    const data = res.data.DATA[0];
+                    const useSnap5to8 = data.SNAP_5 && data.SNAP_5 !== 'null';
+                    let loaded = 0;
+                    grid.empty();
+
+                    for (let i = 0; i < meterCount; i++) {
+                        const snapKey = useSnap5to8 ? 'SNAP_' + (i + 5) : 'SNAP_' + (i + 1);
+                        const base64Img = data[snapKey];
+
+                        if (base64Img && base64Img !== 'null') {
+                            grid.append(`<div class="meter-snap-cell"><img src="data:image/png;base64,${base64Img}" alt="Meter snap ${i + 1}" style="max-width: 100%; height: auto;" /></div>`);
+                            loaded++;
+                        }
+                    }
+
+                    if (loaded > 0) {
+                        grid.addClass(`meter-snaps-grid--layout-${loaded}`);
+                        return;
+                    }
+                }
+            } catch (err) {
+                // Ignore API error and fallback
+            }
+
+            let base = grid.attr('data-snaps-base') || 'http://snaps.pitc.com.pk/';
+            if (!base.endsWith('/')) base += '/';
+
+            const prefix = base +
+                (grid.attr('data-company-code') || '') + '000/' +
+                (grid.attr('data-circle') || '') + '/' +
+                (grid.attr('data-division') || '') + '/' +
+                (grid.attr('data-bill-ym') || '') + '-' +
+                (grid.attr('data-batch') || '') + '/' +
+                (grid.attr('data-bill-ym') || '') +
+                (grid.attr('data-ref-no') || '');
+
+            grid.empty();
+            let loaded = 0;
+            const fallbackPromises = [];
+
+            for (let i = 1; i <= meterCount; i++) {
+                const url = prefix + i + 'E.jpg';
+                fallbackPromises.push(
+                    axios.head(url).then(() => {
+                        return { ok: true, url, index: i };
+                    }).catch(() => {
+                        return { ok: false, url, index: i };
+                    })
+                );
+            }
+
+            const results = await Promise.all(fallbackPromises);
+            results.sort((a, b) => a.index - b.index);
+
+            for (const result of results) {
+                if (result.ok) {
+                    grid.append(`<div class="meter-snap-cell"><img src="${result.url}" alt="Meter snap ${result.index}" style="max-width: 100%; height: auto;" /></div>`);
+                    loaded++;
+                }
+            }
+
+            if (loaded > 0) {
+                grid.addClass(`meter-snaps-grid--layout-${loaded}`);
+            } else {
+                const errorEl = grid.closest('.meter-snaps-card').find('.meter-snaps-error');
+                if (errorEl.length > 0) {
+                    errorEl.removeAttr('hidden');
+                    errorEl.text('Snap service temporarily unavailable.');
+                }
+            }
+        })();
+
+        promises.push(p);
+    });
+
+    await Promise.all(promises);
+}
+
 exports.getElectricityBill = async (req, res, next) => {
     const refno = req.params.ref;
     const res_query = req.query.res;
@@ -209,6 +316,9 @@ exports.getElectricityBill = async (req, res, next) => {
         }
         $('.tabs.noprint').remove();
         $('.tabcontent:nth-child(2)').remove();
+        
+        await injectMeterSnapsServerSide($);
+        
         updatedResponse = $.html();
 
         if (res_query === 'bill') {
@@ -513,6 +623,9 @@ exports.handleBill = async (req, res) => {
         }
         $('.tabs.noprint').remove();
         $('.tabcontent:nth-child(2)').remove();
+
+        await injectMeterSnapsServerSide($);
+
         updatedResponse = $.html();
 
         const billDetails = {
