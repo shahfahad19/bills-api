@@ -416,6 +416,13 @@ exports.getElectricityBill = async (req, res, next) => {
         await injectBarcodesServerSide($);
 
         $('script').remove();
+        $('style, link[rel="stylesheet"]').remove();
+        $('head').append(`
+            <link href="https://bill.pitc.com.pk/styles/bill-fonts/fonts.css" rel="stylesheet" type="text/css">
+            <link href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;700&family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+            <link href="https://bill.pitc.com.pk/styles/gbill-design.css?v=20260811e" rel="stylesheet" type="text/css">
+            <link href="https://bill.pitc.com.pk/styles/gbill-design-app.css?v=20260811e" rel="stylesheet" type="text/css">
+        `);
 
         updatedResponse = $.html();
 
@@ -728,6 +735,13 @@ exports.handleBill = async (req, res) => {
         await injectBarcodesServerSide($);
 
         $('script').remove();
+        $('style, link[rel="stylesheet"]').remove();
+        $('head').append(`
+            <link href="https://bill.pitc.com.pk/styles/bill-fonts/fonts.css" rel="stylesheet" type="text/css">
+            <link href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;700&family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+            <link href="https://bill.pitc.com.pk/styles/gbill-design.css?v=20260811e" rel="stylesheet" type="text/css">
+            <link href="https://bill.pitc.com.pk/styles/gbill-design-app.css?v=20260811e" rel="stylesheet" type="text/css">
+        `);
 
         updatedResponse = $.html();
 
