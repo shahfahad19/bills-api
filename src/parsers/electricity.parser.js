@@ -288,6 +288,7 @@ async function parseElectricityBill({ html, reference, company, includeRemoteAss
         ref: reference,
         bill_name: data.name.split(',')[0].trim(),
         units: data.units === null ? null : `${data.units} Units`,
+        consumption_units: data.units === null ? null : number(data.units),
         bill_month: data.billMonth,
         bill_period: data.billPeriod || null,
         bill_year: data.billYear || null,

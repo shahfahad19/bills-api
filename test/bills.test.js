@@ -47,6 +47,7 @@ test('electricity HTML is parsed by the shared parser', async () => {
     assert.equal(bill.company, 'PESCO');
     assert.equal(bill.bill_name, 'ALI KHAN');
     assert.equal(bill.units, '250 Units');
+    assert.equal(bill.consumption_units, 250);
     assert.equal(bill.current_bill, '12345');
     assert.equal(Object.hasOwn(bill, 'after_due_bill'), false);
     assert.equal(Object.hasOwn(bill, 'late_payment_schedule'), false);

@@ -49,7 +49,7 @@ function protectionInsight(data, history, units) {
         : status === 'unprotected' && applicable && knownWindow ? 6 - streak : null;
     return {
         status, source: 'provider_category', eligible_tariff_scope: applicable ? true : domestic && load === null ? null : false,
-        monthly_limit_kwh: 200, required_consecutive_months: 6,
+        monthly_limit_units: 200, monthly_limit_kwh: 200, required_consecutive_months: 6,
         observed_qualifying_months: streak, history_sufficient: knownWindow, evidence,
         additional_qualifying_bills_needed: remaining,
         estimated_qualification_period: status === 'unprotected' && remaining !== null
@@ -61,8 +61,8 @@ function protectionInsight(data, history, units) {
         note: status === 'protected' ? 'The provider already classifies this bill as protected.'
             : !applicable ? 'A protection countdown needs a confirmed domestic non-TOU tariff with sanctioned load below 5 kW.'
             : !knownWindow ? 'Insufficient consecutive monthly readings for a reliable countdown.'
-            : 'Assumes each future billed month remains at or below 200 kWh. The first-protected-bill month is a planning estimate after six qualifying bills; the utility determines actual classification.',
-        rule: 'Domestic non-TOU consumers: at most 200 kWh per month over the preceding six months.',
+            : 'Assumes each future billed month remains at or below 200 units. The first-protected-bill month is a planning estimate after six qualifying bills; the utility determines actual classification.',
+        rule: 'Domestic non-TOU consumers: at most 200 units per month over the preceding six months.',
         rule_source: 'https://nepra.org.pk/tariff/Distribution%20PESCO.php',
         rule_verification: 'The six-month window is a planning assumption pending confirmation against the latest eligibility notification; the 200-unit tariff bands and provider category were verified.',
         pro_rata: /pro.?rata/i.test(data.meterStatus || ''),
@@ -83,7 +83,7 @@ function buildInsights(data, charges, history) {
     const paymentRows = history.filter(row => row.payment_amount !== null);
     const protection = protectionInsight(data, history, units);
     const cost = {
-        currency: 'PKR', unit: 'kWh',
+        currency: 'PKR', unit: 'unit',
         average_energy_only: ratio(charges.energy.variable_charges, units),
         average_current_bill: ratio(charges.summary['Current Bill'] ?? null, units),
         effective_payable: ratio(payable, units),
@@ -94,13 +94,13 @@ function buildInsights(data, charges, history) {
     };
     const suggestions = [];
     if (protection.status === 'protected' && units !== null) suggestions.push({ code: 'KEEP_PROTECTED',
-        message: `Keep each billed month at or below 200 kWh. This bill uses ${units} kWh; its margin to 200 is ${protection.billed_units_below_limit} kWh. Track actual readings and any pro-rata carry-forward.` });
+        message: `Keep each billed month at or below 200 units. This bill uses ${units} units; its margin to 200 is ${protection.billed_units_below_limit} units. Track actual readings and any pro-rata carry-forward.` });
     if (protection.status === 'unprotected' && protection.eligible_tariff_scope) suggestions.push({ code: 'REGAIN_PROTECTION',
         message: protection.additional_qualifying_bills_needed === null
-            ? 'Collect consecutive bills and target at most 200 kWh per billing month; current history cannot establish a conversion date.'
-            : `Target at most 200 kWh per billed month for ${protection.additional_qualifying_bills_needed} more qualifying bills. Utility confirmation is needed before assuming protected rates.` });
+            ? 'Collect consecutive bills and target at most 200 units per billing month; current history cannot establish a conversion date.'
+            : `Target at most 200 units per billed month for ${protection.additional_qualifying_bills_needed} more qualifying bills. Utility confirmation is needed before assuming protected rates.` });
     if (previous && units !== null && previous.units !== null && units > previous.units) suggestions.push({ code: 'USAGE_INCREASE',
-        message: `Consumption rose by ${round(units - previous.units)} kWh from last month. Compare cooling, heating and pump operating hours, as well as the billed reading period.` });
+        message: `Consumption rose by ${round(units - previous.units)} units from last month. Compare cooling, heating and pump operating hours, as well as the billed reading period.` });
     const scenarios = [];
     if (units > 0 && charges.energy.slabs_verified) {
         // Value reductions using the highest billed slabs first, with the same
@@ -119,7 +119,7 @@ function buildInsights(data, charges, history) {
                 target_units: round(units - reduction), estimated_energy_charge_saving: round(saved),
                 assumptions: 'Same billed energy slabs and consumer status; excludes changes to fixed charges, taxes, FPA, quarterly adjustments and rounding.' });
         }
-        suggestions.push({ code: 'REDUCE_RUNTIME', message: 'Prioritize high-power appliances: energy saved in kWh = watts reduced × hours per day × days ÷ 1000. Use your actual appliance rating and runtime.' });
+        suggestions.push({ code: 'REDUCE_RUNTIME', message: 'Start with high-power appliances such as cooling, heating and water pumps. Reducing their daily runtime usually has the clearest effect on units consumed.' });
     }
     if (data.paid) suggestions.push({ code: 'PAYMENT_RECORDED', message: 'Payment is already recorded for this bill; retain the receipt.' });
     else if (data.paid === false && data.dueDate) suggestions.push({ code: 'PAY_BY_DUE_DATE', message: 'Pay by the printed due date to avoid late-payment charges.' });

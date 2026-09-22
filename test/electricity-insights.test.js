@@ -129,6 +129,7 @@ test('shared parser exposes detailed fields and removes late-payment fields', as
     <div class="payable-card-amount">2938</div>${detailHtml}</body></html>`;
     const bill = await parseBill({type:'electricity',reference:'03260000000000',html});
     assert.equal(bill.bill_year,2026);
+    assert.equal(bill.consumption_units,157);
     assert.equal(bill.charges.taxes.combined_total,474.94);
     assert.equal(bill.insights.cost_per_unit.effective_payable,18.71);
     assert.equal(Object.hasOwn(bill,'after_due_bill'),false);
